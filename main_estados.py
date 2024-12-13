@@ -31,7 +31,6 @@ class Lexer:
             if not self.q0():
                 char = self.line[self.head_position]
                 raise ValueError(f"Caractere inválido '{char}' na linha {self.line_number}.")
-              
     def verificar_space_tab(self, char):
         return char in {' ', '\t'}
     
@@ -51,20 +50,19 @@ class Lexer:
         elif char in {'!'}:
             self.forward_head()
             return self.q05()
-          
         elif char in {'='}:
             self.forward_head()
             return self.q06()
-          
+        
         elif char in {'<'}:
             self.forward_head()
             return self.q07()
-          
+        
         elif char in {'>'}:
             #self.add_token(char, char)
             self.forward_head()
             return self.q08()
-          
+        
         elif char in {'+'}:
             #self.add_token(char, char)
             self.forward_head()
@@ -123,52 +121,49 @@ class Lexer:
         return True
         
     def q05(self):
-      char = self.current_char()
-      
-      if char == '=':
-          self.forward_head()
-          self.add_token('DIFERENTE', '!=')
-      else:
-          self.add_token('NEGACAO', '!')
-      return True
+        char = self.current_char()
+        if char == '=':
+            self.forward_head()
+            self.add_token('DIFERENTE', '!=')
+        else:
+            self.add_token('NEGACAO', '!')
+        return True
         
     def q06(self):
-      char = self.current_char()
-      if char == '=':
-          self.forward_head()
-          self.add_token('IGUAL', '==')
-      else:
-          self.add_token('ATRIBUICAO', '=')
-      return True
+        char = self.current_char()
+        if char == '=':
+            self.forward_head()
+            self.add_token('IGUAL', '==')
+        else:
+            self.add_token('ATRIBUICAO', '=')
+        return True
     
     def q07(self):
-      char = self.current_char()
-      if char == '=':
-          self.forward_head()
-          self.add_token('MENOR_IGUAL', '<=')
-      else:
-          self.add_token('MENOR', '<')
-      return True
+        char = self.current_char()
+        if char == '=':
+            self.forward_head()
+            self.add_token('MENOR_IGUAL', '<=')
+        else:
+            self.add_token('MENOR', '<')
+        return True
     
     def q08(self):
-      char = self.current_char()
-      
-      if char == '=':
-          self.forward_head()
-          self.add_token('MAIOR_IGUAL', '>=')
-      else:
-          self.add_token('MAIOR', '>')
-      return True
+        char = self.current_char()
+        if char == '=':
+            self.forward_head()
+            self.add_token('MAIOR_IGUAL', '>=')
+        else:
+            self.add_token('MAIOR', '>')
+        return True
     
     def q09(self):
-      char = self.current_char()
-      
-      if char == '+':
-          self.forward_head()
-          self.add_token('INCREMENTO', '++')
-      else:
-          self.add_token('SOMA', '+')
-      return True
+        char = self.current_char()
+        if char == '+':
+            self.forward_head()
+            self.add_token('INCREMENTO', '++')
+        else:
+            self.add_token('SOMA', '+')
+        return True
     def q10(self): 
         self.add_token('ABRE_PARENTESE', '(') 
         return True 
