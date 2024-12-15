@@ -31,10 +31,27 @@ class Parser:
     #melhorar tratativas de erros
     def start(self):
         if self.program():
-            return print("Deu bom")
+            print("\033[92m[ok] Execução bem-sucedida: Deu bom!\033[0m")  
+            return True
+        else:
+            print("\033[91m[err] Execução falhou: Deu ruim.\033[0m")  
+            return False
+
         
-        return print("Deu ruim")
-    
+    """
+    def start(self):
+        try:
+            if self.program():
+                print("\033[92m[ok] Execução bem-sucedida: Deu bom!\033[0m")  
+                return True
+            else:
+                print("\033[91m[err] Execução falhou: Deu ruim.\033[0m")  
+                return False
+        except Exception as e:
+            print(f"\033[93m[!] Erro ao executar o programa: {e}\033[0m")  
+            return False
+    """
+    # ================= Descrição BNF da Linguagem Simplificada ===================================== #
     def program(self):
         self.getNextToken()
 
@@ -43,30 +60,34 @@ class Parser:
         elif self.mainBody():
             return True
         return False
+    
+    def mainBody(self):
+        if(self.match("meme")):
+            self.getNextToken()
 
-    #incompleto 
-    # <sub-routine-step> ::= (<declaration-procedure>; | <declaration-fuction>;)
-    # [ <declaration-procedure>; | <declaration-fuction>;]*
-    def subRoutineStep(self):      
-        return False
+            if(self.body()):
+                return True
+        return False 
     
-    # ==================================== DECLARAÇÕES =============================================== #
-    
-    def type(self):
-        if(self.match("int")):
-            return True
-        elif(self.match("bruh")):
-            return True
-        
-        return False
-    
-    # Fazer mais declarações
-    def declarationVariable(self):
-        if(self.type()):
-            if(self.identifier()):
-                if(self.colon()):
-                    #if para declaration variable dnv
+    def body(self):
+        #Valida se termina começa com "{"
+        if(self.match("{")):
+            self.getNextToken()
+
+            #Valida se tem variáveis declaradas [<variable-declaration-step>]
+            self.declarationVariableStep()
+
+            #Valida se tem comandos
+            if(self.statements()):
+                self.getNextToken()
+
+                #Valida se termina com "}"
+                if(self.match("}")):
                     return True
+        return False
+    
+    #incompleto 
+    def subRoutineStep(self):      
         return False
     
     #incompleto
@@ -80,20 +101,56 @@ class Parser:
                     
                     self.declarationVariableStep()
         return False
-
+    # ==================================== DECLARAÇÕES =============================================== #
     
+    def type(self):
+        if(self.match("int")):
+            return True
+        elif(self.match("bruh")):
+            return True
+        
+        return False
+    
+    # Fazer mais declarações
+    def declarationVariable(self):
+        if self.type():
+            self.getNextToken()
+            if self.identifier():
+                self.getNextToken()
+                if self.colon():
+                    self.getNextToken()
+                    
+                    while self.type():
+                        if not self.declarationVariable():
+                            return False
+
+                    return True 
+        return False
+
+    def declarationVariableInitial(self):
+        if self.type():
+            self.getNextToken()
+            if self.assignStatement():
+                self.getNextToken()
+                while self.type():
+                    if not self.declarationVariableInitial():
+                        return False
+                return True 
+        return False
     
     def declarationParameters(self):
         if(self.type()):
             self.getNextToken()
             if(self.identifier()):
                 self.getNextToken()
-                self.match(',')
+                
+            while self.match(','):
+                self.getNextToken()
                 self.declarationParameters()
                 
-                
-        return True
-    
+            return True
+        
+        return False
     # <declaration-procedure> ::= void hora_do_show <identifier> ([<declaration-parameters>]*) <body>
     def declarationProcedure(self):
         if(self.match("void")):
@@ -130,36 +187,8 @@ class Parser:
                                 return True
         return False
     
+    # ==================================== COMANDOS =============================================== #
     
-    # ==================================== MAIN =============================================== #
-    
-    def mainBody(self):
-        if(self.match("meme")):
-            self.getNextToken()
-
-            if(self.body()):
-                return True
-        return False 
-    
-    def body(self):
-        #Valida se termina começa com "{"
-        if(self.match("{")):
-            self.getNextToken()
-
-            #Valida se tem variáveis declaradas [<variable-declaration-step>]
-            self.declarationVariableStep()
-
-            #Valida se tem comandos
-            if(self.statements()):
-                self.getNextToken()
-
-                #Valida se termina com "}"
-                if(self.match("}")):
-                    return True
-        return False
-    
-
-
     def statements(self):
         if(self.statement()):
             hasStatementsLeft = True
@@ -261,7 +290,19 @@ class Parser:
                         if(self.match(";")):
                             return True
         return False
+    
+    def returnStatement(self):
+        if(self.match("receba")):
+            self.getNextToken()
 
+            if(self.expression()):
+                self.getNextToken()
+
+                if(self.match(";")):
+                    return True
+
+        return False
+    
     #não testado ainda por causa de identifier e declarationParameters
     def callOrAssignStatement(self):
         if(self.assignStatement()):
@@ -305,18 +346,8 @@ class Parser:
                 #             return True
         return False
 
-    def returnStatement(self):
-        if(self.match("receba")):
-            self.getNextToken()
-
-            if(self.expression()):
-                self.getNextToken()
-
-                if(self.match(";")):
-                    return True
-
-        return False
-
+    # ==================================== EXPRESSÕES =============================================== #
+    
     #incompleto
     def expression(self):
         if(self.simpleExpression()):
@@ -329,7 +360,7 @@ class Parser:
                 if(self.simpleExpression()):
                     return True
             else:
-                self.getPreviousToken()
+                #self.getPreviousToken()
                 return True
             return True
         return False
@@ -355,7 +386,34 @@ class Parser:
             return True
 
         return False
+    
+    def assignOperator(self):
+        if(self.match("==")):
+            self.getNextToken()
+            return True
+        elif(self.match("!=")):
+            self.getNextToken()
+            return True
+        elif(self.match("<")):
+            self.getNextToken()
+            return True
+        elif(self.match("<=")):
+            self.getNextToken()
+            return True
+        elif(self.match(">")):
+            self.getNextToken()
+            return True
+        elif(self.match(">=")):
+            self.getNextToken()
+            return True
+        elif(self.match("AND")):
+            self.getNextToken()
+            return True
+        elif(self.match("OR")):
+            self.getNextToken()
+            return True
 
+        return False
     #incompleto
     def term(self):
         if(self.factor()):
@@ -377,15 +435,29 @@ class Parser:
 
         return False
 
-    #incompleto
+    # ==================================== NÚMEROS E IDENTIFICADORES =============================================== #
+    
+    #incompleto - ja vem do lexer como id, acredito que não precisa verificar o word e digit
     def identifier(self):
         if(self.match("id")):
             return True
         
         return False
     
+    def number(self):
+        if(self.match('number')):
+            return True
+        
+        return False
+    
     def colon(self):
         if(self.match(";")):
+            return True
+        
+        return False
+    
+    def comment(self):
+        if(self.match("//")):
             return True
         
         return False

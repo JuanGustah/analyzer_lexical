@@ -79,6 +79,9 @@ class Lexer:
         elif char == '*': 
             self.forward_head() 
             return self.q17()
+        elif char == ',': 
+            self.forward_head() 
+            return self.q18()
         elif re.match(DIGIT, char):
             self.current_word = char
             self.forward_head()
@@ -193,6 +196,10 @@ class Lexer:
     
     def q17(self): 
         self.add_token('*') 
+        return True
+    
+    def q18(self): 
+        self.add_token(',') 
         return True
     
     def get_reserved_or_id(self, word):
