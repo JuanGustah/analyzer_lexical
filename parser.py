@@ -52,6 +52,7 @@ class Parser:
             return False
     """
     # ================= Descrição BNF da Linguagem Simplificada ===================================== #
+    
     def program(self):
         self.getNextToken()
 
@@ -75,7 +76,8 @@ class Parser:
             self.getNextToken()
 
             #Valida se tem variáveis declaradas [<variable-declaration-step>]
-            self.declarationVariableStep()
+            if(self.declarationVariableStep()):
+                self.getNextToken()
 
             #Valida se tem comandos
             if(self.statements()):
@@ -88,19 +90,25 @@ class Parser:
     
     #incompleto 
     def subRoutineStep(self):      
+        if self.declarationProcedure():
+            self.getNextToken()
+            return True
+        elif self.declarationFunction():
+            self.getNextToken()
+            return True
         return False
     
     #incompleto
     def declarationVariableStep(self):
-        if(self.type()):
-            if(self.assignStatement()):
-                if self.colon():
-                    return True
-                else:
-                    self.getNextToken()
-                    
-                    self.declarationVariableStep()
+    
+        if self.declarationVariable():
+            self.getNextToken()
+            return True
+        elif self.declarationVariableInitial():
+            self.getNextToken()
+            return True
         return False
+    
     # ==================================== DECLARAÇÕES =============================================== #
     
     def type(self):
@@ -151,6 +159,7 @@ class Parser:
             return True
         
         return False
+    
     # <declaration-procedure> ::= void hora_do_show <identifier> ([<declaration-parameters>]*) <body>
     def declarationProcedure(self):
         if(self.match("void")):
@@ -360,7 +369,6 @@ class Parser:
                 if(self.simpleExpression()):
                     return True
             else:
-                #self.getPreviousToken()
                 return True
             return True
         return False
@@ -414,12 +422,15 @@ class Parser:
             return True
 
         return False
+    
     #incompleto
     def term(self):
         if(self.factor()):
-            # self.getNextToken()
+            self.getNextToken()
 
-            #verificar outros termos
+            while self.match('+') or self.match('-') or self.match('*') or self.match('/'):
+                self.getNextToken()
+                self.term()
 
             return True
         return False
@@ -427,6 +438,12 @@ class Parser:
     #incompleto
     def factor(self):
         if(self.identifier()):
+            return True
+        elif(self.number()):
+            return True
+        elif(self.callFunctionStatement()):
+            return True
+        elif(self.expression()):
             return True
         elif(self.match("real")):
             return True
@@ -437,7 +454,6 @@ class Parser:
 
     # ==================================== NÚMEROS E IDENTIFICADORES =============================================== #
     
-    #incompleto - ja vem do lexer como id, acredito que não precisa verificar o word e digit
     def identifier(self):
         if(self.match("id")):
             return True

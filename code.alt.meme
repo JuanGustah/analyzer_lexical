@@ -1,7 +1,7 @@
 meme {
     bruh idea1;
     bruh idea2; int nu;
-    int soma = 20;
+    int contas = 20;
     int soma = 20; int div = 15;
 
 
