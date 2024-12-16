@@ -2,7 +2,7 @@ import lexer
 import parser
 
 if __name__ == "__main__":
-    lexer = lexer.Lexer("code2.meme")
+    lexer = lexer.Lexer("code3.meme")
     lexer.start()
     #lexer.display_tokens()
     #lexer.display_symbol_table()

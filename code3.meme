@@ -1,0 +1,87 @@
+int hora_do_show soma1() {
+    #int sum = 30; bruh teste = real; bruh teste3 = barca;#
+    int soma; int soma3;
+    int soma2 = 20;
+    bruh teste = barca;
+    bruh teste2 = real;
+
+    amostradinho(real);
+
+}
+
+int hora_do_show soma2(int x, int y) {
+
+
+    int sum = 30; bruh teste = real; bruh teste3 = barca;
+    int soma; int soma3;
+
+
+    int soma2 = 20;
+    bruh teste = barca;
+    bruh teste2 = real;
+
+    amostradinho(real);
+    minha_funcao = comandos();
+    comandos(x, j);
+}
+
+void hora_do_show comandos(int x, int y) {
+    int soma;
+
+    
+    irineu_voce_sabe(x >= y){
+        amostradinho(barca)
+    } nem_eu{
+        casca_de_bala(x);
+    };
+
+
+
+    irineu_voce_sabe(x <= y){
+        amostradinho(barca)
+    } nem_eu{
+        casca_de_bala(x);
+    };
+
+
+
+    irineu_voce_sabe(x == y){
+        amostradinho(barca)
+    } nem_eu{
+        casca_de_bala(x);
+    };
+
+
+    here_we_go_again(real){
+        amostradinho(barca);
+        ate_outro_dia;
+    };
+
+
+    here_we_go_again(real){
+        amostradinho(barca);
+        papapare;
+    };
+
+
+
+    amostradinho(barca / 2);
+
+    casca_de_bala(x);
+
+    receba soma + 1;
+}
+
+void hora_do_show procedimento2() {
+    int soma;
+    amostradinho(real);
+}
+
+meme {
+    int soma;
+    int x; int y;
+
+    amostradinho(x + y + z / 10);
+
+}
+

@@ -5,22 +5,21 @@ class Parser:
         self.actualTokenPos = -1
         self.actualToken = []
 
-    #incompleto
     def match(self, matchString):
-        tokenString = self.actualToken[0][0]
-
+        #tokenString = self.actualToken[0][0]
+        tokenString, line = self.actualToken[0][0], self.actualToken[1]
+        
         if(tokenString == 'id' and matchString== 'id'):
             idIndex = self.actualToken[0][1]
             if(self.symbol_table.lookup(idIndex)):
                 return True
-        elif(tokenString == 'number' and matchString== 'number'):
+        elif(tokenString == 'number' and matchString == 'number'):
             value = self.actualToken[0][1]
             if(value is not None):
                 return True
             return True
         elif(tokenString == matchString):
             return True
-        
         return False
     
     def getNextToken(self):
@@ -32,13 +31,14 @@ class Parser:
         else:
             self.actualToken = None
     
-    #melhorar tratativas de erros
     def start(self):
         if self.program():
             print("\033[92m[ok] Execução bem-sucedida: Deu bom!\033[0m")  
             return True
         else:
-            print("\033[91m[err] Execução falhou: Deu ruim.\033[0m")  
+            
+            print("\033[91m[err] Execução falhou:\033[0m")
+            print(f"\033[91m[err] Token = {self.actualToken[0][2]}, Linha = {self.actualToken[1]}\033[0m")  
             return False
 
     # ================= Descrição BNF da Linguagem Simplificada ===================================== #
@@ -46,21 +46,18 @@ class Parser:
     def program(self):
         self.getNextToken()
         
-        # Processa todas as sub-rotinas (funções ou procedimentos)
-        while self.type() or self.match('void'):
-            if not self.subRoutineStep():
-                return False
-            # Avança para o próximo token para verificar mais sub-rotinas
-            self.getNextToken()
-        
-        # Processa o corpo principal (mainBody)
-        if self.mainBody():
-            return True  # Retorna sucesso se o corpo principal foi processado corretamente
-        
-        return False  # Falha se não encontrou ou não processou corretamente
+        while self.type() or self.match('void'):  
+            if self.subRoutineStep():
+                self.getNextToken()
+                continue
+            else:
+                
+                return False  
 
-        
-    
+        if self.mainBody(): 
+            return True
+        return False
+
     def mainBody(self):
         if(self.match("meme")):
             self.getNextToken()
@@ -70,11 +67,9 @@ class Parser:
         return False 
     
     def body(self):
-        #Valida se termina começa com "{"
         if(self.match("{")):
             self.getNextToken()
 
-            #Valida se tem variáveis declaradas [<variable-declaration-step>]
             if(self.type()):
                 if(self.declarationVariableStep()):
                     
@@ -115,7 +110,6 @@ class Parser:
         
         return False
     
-    # Ok
     def declarationVariable(self):
         if self.type(): 
             self.getNextToken()  
@@ -124,12 +118,8 @@ class Parser:
                 self.getNextToken()  
 
                 if self.match("="):
-                    # Errado, precisa pegar oque esta antes do =
                     if self.assignStatement():  
                         self.getNextToken()  
-                        #if not self.match(";"):  
-                        #    return False
-                        #self.getNextToken() 
                         return True
 
                 if self.match(";"):
@@ -152,41 +142,38 @@ class Parser:
         
         return False
     
-    # <declaration-procedure> ::= void hora_do_show <identifier> ([<declaration-parameters>]*) <body>
     def declarationFunctionProcedure(self):
-    # Procedimento com 'void hora_do_show'
         if self.match("void"):
             self.getNextToken()
             if self.match('hora_do_show'):
                 self.getNextToken()
-                if self.identifier():  # Nome do procedimento
+                if self.identifier(): 
                     self.getNextToken()
-                    if self.match('('):  # Início dos parâmetros
+                    if self.match('('):  
                         self.getNextToken()
-                        if self.declarationParameters():  # Verifica os parâmetros
-                            pass  # Parâmetros são opcionais
-                        if self.match(')'):  # Fechamento dos parâmetros
+                        if self.declarationParameters():  
+                            pass  
+                        if self.match(')'):  
                             self.getNextToken()
-                            if self.body():  # Corpo do procedimento
+                            if self.body():  
                                 return True
             return False
 
-        # Função com tipo de retorno e 'hora_do_show'
-        if self.type():  # Tipo de retorno
+        if self.type():  
             self.getNextToken()
             if self.match('hora_do_show'):
                 self.getNextToken()
-                if self.identifier():  # Nome da função
+                if self.identifier(): 
                     self.getNextToken()
-                    if self.match('('):  # Início dos parâmetros
+                    if self.match('('):  
                         self.getNextToken()
-                        if self.declarationParameters():  # Verifica os parâmetros
-                            pass  # Parâmetros são opcionais
-                        if self.match(')'):  # Fechamento dos parâmetros
+                        if self.declarationParameters():  
+                            pass  
+                        if self.match(')'): 
                             self.getNextToken()
-                            if self.body():  # Corpo da função
+                            if self.body():
                                 return True
-        return False
+            return False
 
             
     
@@ -229,7 +216,6 @@ class Parser:
             return True
         return False
     
-    #incompleto
     def conditionStatement(self):
         if(self.match("irineu_voce_sabe")):
             self.getNextToken()
@@ -242,20 +228,18 @@ class Parser:
                         self.getNextToken()
 
                         if(self.body()):
-                            self.getNextToken() #problema
+                            self.getNextToken()
                             if(self.match("nem_eu")):
                                 self.getNextToken()
 
                                 if(self.body()):
                                     return True
 
-                            #validar como corrigir
                             return True
         return False
     
     #incompleto
     def loopStatement(self):
-        #validar se vale a pena fazer o do-while
         if(self.match("here_we_go_again")):
             self.getNextToken()
 
@@ -266,7 +250,6 @@ class Parser:
                     if(self.match(")")):
                         self.getNextToken()
 
-                        #validar como fazer um body diferente para permitir break e continue
                         if(self.body()):
                             return True
         return False

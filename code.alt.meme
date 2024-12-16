@@ -12,21 +12,24 @@ void hora_do_show soma2(int x, int y) {
 
     irineu_voce_sabe(real){
      	amostradinho(barca)
-  	}
+  	} nem_eu{
+        casca_de_bala(x);
+    };
     
     here_we_go_again(real){
         amostradinho(barca)
-    }
+    };
 
-    amostradinho(barca)
+    amostradinho(barca);
 
-    casca_de_bala(x)
+    casca_de_bala(x);
 
     receba soma;
 }
 
 void hora_do_show procedimento2() {
     int soma;
+    amostradinho(real);
 }
 
 meme {

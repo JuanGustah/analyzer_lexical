@@ -7,7 +7,7 @@ RESERVED_WORDS = {
     'meme', 'int', 'bruh', 'hora_do_show', 'irineu_voce_sabe', 
     'suprise_mtfk', 'here_we_go_again', 'amostradinho',
     'casca_de_bala', 'receba', 'papapare', 'ate_outro_dia',
-    'real', 'barca', 'and', 'or', 'nem_eu'
+    'real', 'barca', 'and', 'or', 'nem_eu', 'void'
 }
 
 class SymbolTable:
@@ -125,9 +125,10 @@ class Lexer:
 
     def q02(self):
         token_type = self.get_reserved_or_id(self.current_word)
+        token_lexema = self.get_reserved_or_id(self.current_word)
         current_word = self.current_word if token_type == "id" else None
 
-        self.add_token(token_type, current_word)
+        self.add_token(token_type, token_lexema, current_word)
         self.current_word = ''
 
         return True
@@ -147,36 +148,36 @@ class Lexer:
         char = self.current_char()
         if char == '=':
             self.forward_head()
-            self.add_token('!=')
+            self.add_token('!=', '!=')
         else:
-            self.add_token('!')
+            self.add_token('!', '!')
         return True
         
     def q06(self):
         char = self.current_char()
         if char == '=':
             self.forward_head()
-            self.add_token('==')
+            self.add_token('==', '==')
         else:
-            self.add_token('=')
+            self.add_token('=', '=')
         return True
     
     def q07(self):
         char = self.current_char()
         if char == '=':
             self.forward_head()
-            self.add_token('<=')
+            self.add_token('<=', '<=')
         else:
-            self.add_token('<')
+            self.add_token('<', '<')
         return True
     
     def q08(self):
         char = self.current_char()
         if char == '=':
             self.forward_head()
-            self.add_token('>=')
+            self.add_token('>=', '>=')
         else:
-            self.add_token('>')
+            self.add_token('>', '>')
         return True
     
     def q09(self):
@@ -185,49 +186,49 @@ class Lexer:
         #     self.forward_head()
         #     self.add_token('INCREMENTO', '++')
         # else:
-        self.add_token('+')
+        self.add_token('+', '+')
         return True
     
     def q10(self): 
-        self.add_token('(') 
+        self.add_token('(', '(') 
         return True
     
     def q11(self): 
-        self.add_token(')') 
+        self.add_token(')', ')') 
         return True
     
     def q12(self): 
-        self.add_token('{') 
+        self.add_token('{', '{') 
         return True
     
     def q13(self): 
-        self.add_token('}') 
+        self.add_token('}', '}') 
         return True
     
     def q14(self): 
-        self.add_token(';') 
+        self.add_token(';', ';') 
         return True
     
     def q15(self): 
-        self.add_token('/') 
+        self.add_token('/', '/') 
         return True
     
     def q16(self): 
-        self.add_token('-') 
+        self.add_token('-', '-') 
         return True
     
     def q17(self): 
-        self.add_token('*') 
+        self.add_token('*', '*') 
         return True
     
     def q18(self): 
-        self.add_token(',') 
+        self.add_token(',', ',') 
         return True
     
     def q19(self): 
         char = self.current_char()
         while(char != "#"):
-            print("char",char)
+            #print("char",char)
             self.forward_head()
             char = self.current_char()
 
@@ -237,12 +238,12 @@ class Lexer:
     def get_reserved_or_id(self, word):
         return word if word in RESERVED_WORDS else 'id'
 
-    def add_token(self, token_type, value=None):
+    def add_token(self, token_type, lexema=None, value=None):
         if(token_type == 'id'):
             index = self.symbol_table.add(value)
             value = index
 
-        self.tokens.append(([token_type, value], self.line_number))
+        self.tokens.append(([token_type, value, lexema], self.line_number))
 
     def current_char(self):
         return self.line[self.head_position] if self.head_position < len(self.line) else None
