@@ -1,6 +1,7 @@
 class Parser:
-    def __init__(self, tokens):
+    def __init__(self, tokens, symbol_table):
         self.tokens = tokens
+        self.symbol_table = symbol_table
         self.actualTokenPos = -1
         self.actualToken = []
 
@@ -8,11 +9,14 @@ class Parser:
     def match(self, matchString):
         tokenString = self.actualToken[0][0]
 
-        if(tokenString == 'id'):
-            #lógica de ID (olhar tabela de simbolos)
-            return True
-        elif(tokenString == 'number'):
-            #lógica de number (olhar se tem valor)
+        if(tokenString == 'id' and matchString== 'id'):
+            idIndex = self.actualToken[0][1]
+            if(self.symbol_table.lookup(idIndex)):
+                return True
+        elif(tokenString == 'number' and matchString== 'number'):
+            value = self.actualToken[0][1]
+            if(value is not None):
+                return True
             return True
         elif(tokenString == matchString):
             return True
@@ -20,13 +24,13 @@ class Parser:
         return False
     
     def getNextToken(self):
-        zeroIndexLength = len(self.tokens) - 1
-
-        if(self.actualTokenPos < zeroIndexLength):
+        if self.actualTokenPos + 1 < len(self.tokens):
             self.actualTokenPos += 1
             self.actualToken = self.tokens[self.actualTokenPos]
-            #token atual sendo mostrado
-            print(self.actualToken)
+            print(f"[Token Atual]: {self.actualToken}")
+            
+        else:
+            self.actualToken = None
     
     #melhorar tratativas de erros
     def start(self):
@@ -37,30 +41,25 @@ class Parser:
             print("\033[91m[err] Execução falhou: Deu ruim.\033[0m")  
             return False
 
-        
-    """
-    def start(self):
-        try:
-            if self.program():
-                print("\033[92m[ok] Execução bem-sucedida: Deu bom!\033[0m")  
-                return True
-            else:
-                print("\033[91m[err] Execução falhou: Deu ruim.\033[0m")  
-                return False
-        except Exception as e:
-            print(f"\033[93m[!] Erro ao executar o programa: {e}\033[0m")  
-            return False
-    """
     # ================= Descrição BNF da Linguagem Simplificada ===================================== #
     
     def program(self):
         self.getNextToken()
+        
+        # Processa todas as sub-rotinas (funções ou procedimentos)
+        while self.type() or self.match('void'):
+            if not self.subRoutineStep():
+                return False
+            # Avança para o próximo token para verificar mais sub-rotinas
+            self.getNextToken()
+        
+        # Processa o corpo principal (mainBody)
+        if self.mainBody():
+            return True  # Retorna sucesso se o corpo principal foi processado corretamente
+        
+        return False  # Falha se não encontrou ou não processou corretamente
 
-        if self.subRoutineStep():
-            return True
-        elif self.mainBody():
-            return True
-        return False
+        
     
     def mainBody(self):
         if(self.match("meme")):
@@ -76,41 +75,38 @@ class Parser:
             self.getNextToken()
 
             #Valida se tem variáveis declaradas [<variable-declaration-step>]
-            if(self.declarationVariableStep()):
-                self.getNextToken()
+            if(self.type()):
+                if(self.declarationVariableStep()):
+                    
+                    while self.type():
+                        if self.declarationVariableStep():
+                            pass
+                        else:
+                            return False
 
-            #Valida se tem comandos
             if(self.statements()):
-                self.getNextToken()
-
-                #Valida se termina com "}"
                 if(self.match("}")):
                     return True
+            else:
+                return False
         return False
-    
+
     #incompleto 
     def subRoutineStep(self):      
-        if self.declarationProcedure():
-            self.getNextToken()
+        if self.declarationFunctionProcedure():
             return True
-        elif self.declarationFunction():
-            self.getNextToken()
-            return True
+        
         return False
     
     #incompleto
     def declarationVariableStep(self):
     
         if self.declarationVariable():
-            self.getNextToken()
-            return True
-        elif self.declarationVariableInitial():
-            self.getNextToken()
             return True
         return False
     
     # ==================================== DECLARAÇÕES =============================================== #
-    
+    # ok
     def type(self):
         if(self.match("int")):
             return True
@@ -119,31 +115,27 @@ class Parser:
         
         return False
     
-    # Fazer mais declarações
+    # Ok
     def declarationVariable(self):
-        if self.type():
-            self.getNextToken()
-            if self.identifier():
-                self.getNextToken()
-                if self.colon():
-                    self.getNextToken()
-                    
-                    while self.type():
-                        if not self.declarationVariable():
-                            return False
+        if self.type(): 
+            self.getNextToken()  
 
-                    return True 
-        return False
+            if self.identifier():  
+                self.getNextToken()  
 
-    def declarationVariableInitial(self):
-        if self.type():
-            self.getNextToken()
-            if self.assignStatement():
-                self.getNextToken()
-                while self.type():
-                    if not self.declarationVariableInitial():
-                        return False
-                return True 
+                if self.match("="):
+                    # Errado, precisa pegar oque esta antes do =
+                    if self.assignStatement():  
+                        self.getNextToken()  
+                        #if not self.match(";"):  
+                        #    return False
+                        #self.getNextToken() 
+                        return True
+
+                if self.match(";"):
+                    self.getNextToken()     
+                    return True
+            return False
         return False
     
     def declarationParameters(self):
@@ -161,40 +153,42 @@ class Parser:
         return False
     
     # <declaration-procedure> ::= void hora_do_show <identifier> ([<declaration-parameters>]*) <body>
-    def declarationProcedure(self):
-        if(self.match("void")):
+    def declarationFunctionProcedure(self):
+    # Procedimento com 'void hora_do_show'
+        if self.match("void"):
             self.getNextToken()
-            if(self.match('hora_do_show')):
+            if self.match('hora_do_show'):
                 self.getNextToken()
-                if(self.identifier()):
+                if self.identifier():  # Nome do procedimento
                     self.getNextToken()
-                    if(self.match('(')):
+                    if self.match('('):  # Início dos parâmetros
                         self.getNextToken()
-                        self.declarationParameters()
-                        
-                        if(self.match(')')):
+                        if self.declarationParameters():  # Verifica os parâmetros
+                            pass  # Parâmetros são opcionais
+                        if self.match(')'):  # Fechamento dos parâmetros
                             self.getNextToken()
-                            if(self.body()):
+                            if self.body():  # Corpo do procedimento
                                 return True
-                        
+            return False
+
+        # Função com tipo de retorno e 'hora_do_show'
+        if self.type():  # Tipo de retorno
+            self.getNextToken()
+            if self.match('hora_do_show'):
+                self.getNextToken()
+                if self.identifier():  # Nome da função
+                    self.getNextToken()
+                    if self.match('('):  # Início dos parâmetros
+                        self.getNextToken()
+                        if self.declarationParameters():  # Verifica os parâmetros
+                            pass  # Parâmetros são opcionais
+                        if self.match(')'):  # Fechamento dos parâmetros
+                            self.getNextToken()
+                            if self.body():  # Corpo da função
+                                return True
         return False
+
             
-    def declarationFunction(self):
-        if(self.type()):
-            self.getNextToken()
-            if(self.match('hora_do_show')):
-                self.getNextToken()
-                if(self.identifier()):
-                    self.getNextToken()
-                    if(self.match('(')):
-                        self.getNextToken()
-                        self.declarationParameters()
-                        
-                        if(self.match(')')):
-                            self.getNextToken()
-                            if(self.body()):
-                                return True
-        return False
     
     # ==================================== COMANDOS =============================================== #
     
@@ -203,14 +197,24 @@ class Parser:
             hasStatementsLeft = True
             while(hasStatementsLeft):
                 self.getNextToken()
-
-                hasStatementsLeft = self.statement()
-
+                
+                if(self.match(";")):
+                    self.getNextToken()
+                    
+                    if(self.match("}")):
+                        return True
+                    
+                    if not self.statement():
+                        return False
+                else:
+                    hasStatementsLeft = False
             return True
         return False
     
     #completo mas precisar testar todos os casos
     def statement(self):
+        if(self.jumpStopStatement()):
+            return True
         if(self.conditionStatement()):
             return True
         elif(self.loopStatement()):
@@ -221,11 +225,12 @@ class Parser:
             return True
         elif(self.callOrAssignStatement()):
             return True
+        elif(self.returnStatement()):
+            return True
         return False
     
     #incompleto
     def conditionStatement(self):
-        #não tá lendo o ?
         if(self.match("irineu_voce_sabe")):
             self.getNextToken()
 
@@ -233,14 +238,18 @@ class Parser:
                 self.getNextToken()
 
                 if(self.expression()):
-                    self.getNextToken()
-                    
                     if(self.match(")")):
                         self.getNextToken()
 
                         if(self.body()):
-                            #verificar se vale a pena fazer o else
+                            self.getNextToken() #problema
+                            if(self.match("nem_eu")):
+                                self.getNextToken()
 
+                                if(self.body()):
+                                    return True
+
+                            #validar como corrigir
                             return True
         return False
     
@@ -254,8 +263,6 @@ class Parser:
                 self.getNextToken()
 
                 if(self.expression()):
-                    self.getNextToken()
-                    
                     if(self.match(")")):
                         self.getNextToken()
 
@@ -263,7 +270,14 @@ class Parser:
                         if(self.body()):
                             return True
         return False
-
+    
+    def jumpStopStatement(self):
+        if(self.match("papapare")):
+            return True
+        if(self.match("ate_outro_dia")):
+            return True
+        return False
+    
     def printStatement(self):
         if(self.match("amostradinho")):
             self.getNextToken()
@@ -272,17 +286,10 @@ class Parser:
                 self.getNextToken()
                 
                 if(self.expression()):
-                    self.getNextToken()
-                    
                     if(self.match(")")):
-                        self.getNextToken()
-
-                        
-                        if(self.match(";")):
-                            return True
+                        return True
         return False
     
-    #não testado ainda por causa de identifier
     def readStatement(self):
         if(self.match("casca_de_bala")):
             self.getNextToken()
@@ -294,10 +301,7 @@ class Parser:
                     self.getNextToken()
                     
                     if(self.match(")")):
-                        self.getNextToken()
-
-                        if(self.match(";")):
-                            return True
+                        return True
         return False
     
     def returnStatement(self):
@@ -305,65 +309,56 @@ class Parser:
             self.getNextToken()
 
             if(self.expression()):
-                self.getNextToken()
-
-                if(self.match(";")):
-                    return True
-
+                return True
         return False
     
-    #não testado ainda por causa de identifier e declarationParameters
+    #não testado ainda por causa de declarationParameters
     def callOrAssignStatement(self):
-        if(self.assignStatement()):
-            return True
-        elif(self.callFunctionStatement()):
-            return True
-        
-        return False
-
-    #não testado ainda por causa de identifier
-    def assignStatement(self):
         if(self.identifier()):
             self.getNextToken()
 
+            #assignStatement
             if(self.match("=")):
                 self.getNextToken()
 
                 if(self.expression()):
-                    self.getNextToken()
-
-                    if(self.match(";")):
-                        return True
+                    return True
+            elif(self.callFunctionStatement()):
+                return True
+        
         return False
-    
-    #incompleto
-    def callFunctionStatement(self):
-        if(self.identifier()):
+
+    def assignStatement(self):
+        if(self.match("=")):
             self.getNextToken()
 
-            if(self.match("(")):
+            if(self.expression()):
+                return True
+        return False
+    
+    def callFunctionStatement(self):
+        if(self.match("(")):
+            self.getNextToken()
+
+            if(self.identifier()):
                 self.getNextToken()
 
-                #finalizar
-                # if(self.declarationParameters()):
-                #     self.getNextToken()
+                while self.match(','):
+                    self.getNextToken()
+                    self.identifier()
+                    self.getNextToken()
 
-                #     if(self.match(")")):
-                #         self.getNextToken()
-
-                #         if(self.match(";")):
-                #             return True
+                if(self.match(")")):
+                    return True
         return False
 
     # ==================================== EXPRESSÕES =============================================== #
     
-    #incompleto
     def expression(self):
         if(self.simpleExpression()):
+            # self.getNextToken()
             
-            self.getNextToken()
-            
-            if(self.assignStatement()):
+            if(self.assignOperator()):
                 self.getNextToken()
                 
                 if(self.simpleExpression()):
@@ -373,7 +368,6 @@ class Parser:
             return True
         return False
 
-    #incompleto
     def simpleExpression(self):
         self.unaryOperator()
         
@@ -397,37 +391,26 @@ class Parser:
     
     def assignOperator(self):
         if(self.match("==")):
-            self.getNextToken()
             return True
         elif(self.match("!=")):
-            self.getNextToken()
             return True
         elif(self.match("<")):
-            self.getNextToken()
             return True
         elif(self.match("<=")):
-            self.getNextToken()
             return True
         elif(self.match(">")):
-            self.getNextToken()
             return True
         elif(self.match(">=")):
-            self.getNextToken()
             return True
         elif(self.match("AND")):
-            self.getNextToken()
             return True
         elif(self.match("OR")):
-            self.getNextToken()
             return True
 
         return False
     
-    #incompleto
     def term(self):
         if(self.factor()):
-            self.getNextToken()
-
             while self.match('+') or self.match('-') or self.match('*') or self.match('/'):
                 self.getNextToken()
                 self.term()
@@ -437,18 +420,28 @@ class Parser:
     
     #incompleto
     def factor(self):
-        if(self.identifier()):
+        if(self.match("real")):
+            self.getNextToken()
+            return True
+        elif(self.match("barca")):
+            self.getNextToken()
             return True
         elif(self.number()):
+            self.getNextToken()
             return True
-        elif(self.callFunctionStatement()):
+        elif(self.identifier()):
+            self.getNextToken()
+            
+            if(self.callFunctionStatement()):
+                self.getNextToken()
+                return True
             return True
-        elif(self.expression()):
-            return True
-        elif(self.match("real")):
-            return True
-        elif(self.match("barça")):
-            return True
+        elif(self.match("(")):
+            self.getNextToken()
+            if(self.expression()):
+                if(self.match(")")):
+                    self.getNextToken()
+                    return True
 
         return False
 
