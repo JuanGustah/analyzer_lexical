@@ -220,10 +220,10 @@ class Lexer:
     
     def get_reserved_or_id(self, word):
         return word if word in RESERVED_WORDS else 'id'
-
+        
     def add_token(self, token_type, lexema=None, value=None):
-        if(token_type == 'id'):
-            index = self.symbol_table.add(value)
+        if token_type == 'id':
+            index = self.symbol_table.add(value, self.line_number, self.head_position)
             value = index
 
         self.tokens.append(([token_type, value, lexema], self.line_number))
