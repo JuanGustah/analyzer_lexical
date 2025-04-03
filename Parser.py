@@ -69,7 +69,9 @@ class Parser:
     def body(self):
         if(self.match("{")):
             self.getNextToken()
-
+            # criar contextos
+            # global
+            # funcao
             if(self.type()):
                 if(self.declarationVariableStep()):
                     

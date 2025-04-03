@@ -1,26 +1,5 @@
 import re
-
-# Tabela de símbolos = output
-class SymbolTable:
-    def __init__(self):
-        self.table: dict = {}
-
-    def add(self, id: str, attributes: any):
-        self.table[id] = attributes
-
-    def lookup(self, id: str):
-        return self.table.get(id)
-
-    def update(self, id: str, attributes: any):
-        self.table[id].update(attributes)
-      
-    def listar(self):
-        print("\nTabela de Símbolos:")
-        for id, attributes in self.table.items():
-            print(f"Identificador: {id}")
-            for key, value in attributes.items():
-                print(f"  {key}: {value}")
-
+from symtable import SymbolTable
 
 class Lexer:
     def __init__(self, code: str):
@@ -108,19 +87,19 @@ class Lexer:
 
 
 # Teste do Lexer
-if __name__ == "__main__":
-    program_code = """
-    meme {
-        int x = 1;
-        int y = 2;
-        irineu_voce_sabe(x == 1) {
-            amostradinho(x + y);
-            x = 15;
-        }
-    }
-    """
+# if __name__ == "__main__":
+#     program_code = """
+#     meme {
+#         int x = 1;
+#         int y = 2;
+#         irineu_voce_sabe(x == 1) {
+#             amostradinho(x + y);
+#             x = 15;
+#         }
+#     }
+#     """
 
-    lexer = Lexer(program_code)
-    lexer.tokenize()
-    lexer.display_tokens()
-    lexer.symbol_table.listar()
+#     lexer = Lexer(program_code)
+#     lexer.tokenize()
+#     lexer.display_tokens()
+#     lexer.symbol_table.listar()
