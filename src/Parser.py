@@ -1,20 +1,28 @@
+from tabulate import tabulate
+
+
 class Parser:
     def __init__(self, tokens, symbol_table):
         self.tokens = tokens
         self.symbol_table = symbol_table
         self.actualTokenPos = -1
         self.actualToken = []
+        self.structure_print = []
 
+    def print_all(self):
+        
+        print(tabulate(self.structure_print, headers=["Tipo", "Valor", "Lexema", "Linha"], tablefmt="grid"))
+        
     def match(self, matchString):
         #tokenString = self.actualToken[0][0]
-        tokenString, line = self.actualToken[0][0], self.actualToken[1]
+        tokenString, line = self.actualToken[0], self.actualToken[1]
         
         if(tokenString == 'id' and matchString== 'id'):
-            idIndex = self.actualToken[0][1]
+            idIndex = self.actualToken[1]
             if(self.symbol_table.lookup(idIndex)):
                 return True
         elif(tokenString == 'number' and matchString == 'number'):
-            value = self.actualToken[0][1]
+            value = self.actualToken[1]
             if(value is not None):
                 return True
             return True
@@ -26,7 +34,15 @@ class Parser:
         if self.actualTokenPos + 1 < len(self.tokens):
             self.actualTokenPos += 1
             self.actualToken = self.tokens[self.actualTokenPos]
-            print(f"[Token Atual]: {self.actualToken}")
+            #print(f"[Token Atual]: {self.actualToken}")
+            #self.structure_print.append(self.actualToken)
+            
+            self.structure_print.append([
+                self.actualToken[0],  # Tipo 
+                self.actualToken[1], #Valor
+                self.actualToken[2],   # lexema
+                self.actualToken[3]    # linha 
+            ])
             
         else:
             self.actualToken = None
