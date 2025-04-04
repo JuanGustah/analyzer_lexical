@@ -1,20 +1,17 @@
 from tabulate import tabulate
 
-
 class Parser:
     def __init__(self, tokens, symbol_table):
         self.tokens = tokens
         self.symbol_table = symbol_table
         self.actualTokenPos = -1
         self.actualToken = []
-        self.structure_print = []
 
     def print_all(self):
         
         print(tabulate(self.structure_print, headers=["Tipo", "Valor", "Lexema", "Linha"], tablefmt="grid"))
-        
+
     def match(self, matchString):
-        #tokenString = self.actualToken[0][0]
         tokenString, line = self.actualToken[0], self.actualToken[1]
         
         if(tokenString == 'id' and matchString== 'id'):
@@ -34,18 +31,28 @@ class Parser:
         if self.actualTokenPos + 1 < len(self.tokens):
             self.actualTokenPos += 1
             self.actualToken = self.tokens[self.actualTokenPos]
-            #print(f"[Token Atual]: {self.actualToken}")
-            #self.structure_print.append(self.actualToken)
-            
+
             self.structure_print.append([
-                self.actualToken[0],  # Tipo 
-                self.actualToken[1], #Valor
-                self.actualToken[2],   # lexema
-                self.actualToken[3]    # linha 
+                 self.actualToken[0],  # Tipo 
+                 self.actualToken[1], #Valor
+                 self.actualToken[2],   # lexema
+                 self.actualToken[3]    # linha 
             ])
-            
         else:
             self.actualToken = None
+
+    def lookAhead(self, matchString):
+        if self.actualTokenPos + 1 < len(self.tokens):
+            tokenString = self.tokens[self.actualTokenPos+1][0][0]
+
+            isEqual = tokenString == matchString
+
+            if(isEqual):
+                self.getNextToken()
+                return True
+            return False
+        else:
+            return False
     
     def start(self):
         if self.program():
@@ -54,7 +61,7 @@ class Parser:
         else:
             
             print("\033[91m[err] Execução falhou:\033[0m")
-            print(f"\033[91m[err] Token = {self.actualToken[0][2]}, Linha = {self.actualToken[1]}\033[0m")  
+            print(f"\033[91m[err] Token = {self.actualToken[2]}, Linha = {self.actualToken[3]}\033[0m")  
             return False
 
     # ================= Descrição BNF da Linguagem Simplificada ===================================== #
@@ -85,9 +92,7 @@ class Parser:
     def body(self):
         if(self.match("{")):
             self.getNextToken()
-            # criar contextos
-            # global
-            # funcao
+
             if(self.type()):
                 if(self.declarationVariableStep()):
                     
@@ -104,14 +109,12 @@ class Parser:
                 return False
         return False
 
-    #incompleto 
     def subRoutineStep(self):      
         if self.declarationFunctionProcedure():
             return True
         
         return False
     
-    #incompleto
     def declarationVariableStep(self):
     
         if self.declarationVariable():
@@ -119,7 +122,6 @@ class Parser:
         return False
     
     # ==================================== DECLARAÇÕES =============================================== #
-    # ok
     def type(self):
         if(self.match("int")):
             return True
@@ -216,7 +218,6 @@ class Parser:
             return True
         return False
     
-    #completo mas precisar testar todos os casos
     def statement(self):
         if(self.jumpStopStatement()):
             return True
@@ -246,9 +247,9 @@ class Parser:
                         self.getNextToken()
 
                         if(self.body()):
-                            self.getNextToken()
-                            if(self.match("nem_eu")):
+                            if(self.lookAhead("nem_eu")):
                                 self.getNextToken()
+
 
                                 if(self.body()):
                                     return True
@@ -256,7 +257,6 @@ class Parser:
                             return True
         return False
     
-    #incompleto
     def loopStatement(self):
         if(self.match("here_we_go_again")):
             self.getNextToken()
@@ -313,17 +313,12 @@ class Parser:
                 return True
         return False
     
-    #não testado ainda por causa de declarationParameters
     def callOrAssignStatement(self):
         if(self.identifier()):
             self.getNextToken()
 
-            #assignStatement
-            if(self.match("=")):
-                self.getNextToken()
-
-                if(self.expression()):
-                    return True
+            if(self.assignStatement()):
+                return True
             elif(self.callFunctionStatement()):
                 return True
         
@@ -357,8 +352,6 @@ class Parser:
     
     def expression(self):
         if(self.simpleExpression()):
-            # self.getNextToken()
-            
             if(self.assignOperator()):
                 self.getNextToken()
                 
@@ -419,7 +412,6 @@ class Parser:
             return True
         return False
     
-    #incompleto
     def factor(self):
         if(self.match("real")):
             self.getNextToken()
@@ -456,18 +448,6 @@ class Parser:
     
     def number(self):
         if(self.match('number')):
-            return True
-        
-        return False
-    
-    def colon(self):
-        if(self.match(";")):
-            return True
-        
-        return False
-    
-    def comment(self):
-        if(self.match("//")):
             return True
         
         return False
