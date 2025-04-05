@@ -1,8 +1,10 @@
-meme (
-  int x = 1;
-  int y = 2;
-  
-  irineu_voce_sabe(x == 1) {
-    amostradinho(x + y);
+meme {
+  int x = 1+1;
+  bruh y;
+  irineu_voce_sabe(real){
+    amostradinho(1);
+  }
+  here_we_go_again(real){
+    amostradinho(1);
   }
 }
