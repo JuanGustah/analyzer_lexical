@@ -2,12 +2,14 @@ from Lexer import Lexer
 from Parser import Parser
 
 if __name__ == "__main__":
-    lexer = Lexer("input/code3.meme")
+    lexer = Lexer("input/input.meme")
     lexer.start()
     #lexer.display_tokens()
-    #lexer.display_symbol_table()
 
     print('Leitura no Parser')
     parser = Parser(lexer.tokens, lexer.symbol_table)
     parser.start()
-    parser.print_all()
+
+    lexer.display_symbol_table()
+
+    # parser.print_all()
