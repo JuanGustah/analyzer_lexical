@@ -262,7 +262,8 @@ class Parser:
 
     def statements(self, context = None):
         #adicionar validação para return/receba e chamada de função
-        self.statement()
+        # print(self.actualToken)
+        typeStatement = self.statement()
 
         if self.hasStatement(context):
             self.statements()
@@ -277,6 +278,7 @@ class Parser:
         elif(self.match("casca_de_bala")):
             return True
         elif(self.match("receba")):
+            #deve validar se está em contexto de função
             return True
         elif(self.match("papapare")):
             if(context != Context.LOOP):
@@ -305,14 +307,11 @@ class Parser:
             return self.printStatement()
         elif(self.match("casca_de_bala")):
             return self.readStatement()
-        # elif(self.match("receba")):
-        #     return True
-        # elif(self.match("papapare")):
-        #     return True
-        # elif(self.match("ate_outro_dia")):
-        #     return True
-        # elif(self.match("id")):
-        #     return True
+        elif(self.match("receba")):
+            return self.returnStatement()
+        elif(self.match("id")):
+            #falta finalizar
+            return self.callOrAssignStatement()
 
         self.throwSyntaxError()
 
@@ -355,10 +354,10 @@ class Parser:
                             self.getNextToken()
 
                             if(self.body()):
-                                return True
+                                return None
 
-                        return True
-        return False
+                        return None
+        self.throwSyntaxError()
     
     def loopStatement(self):
         if(self.match("here_we_go_again")):
@@ -374,7 +373,7 @@ class Parser:
                         if(self.body(Context.LOOP)):
                             self.getNextToken()
 
-                            return True
+                            return None
                         
         self.throwSyntaxError()
     
@@ -433,21 +432,36 @@ class Parser:
         if(self.match("receba")):
             self.getNextToken()
 
-            if(self.expression()):
-                return True
-        return False
+            typeReturnExpresison = self.expression()
+            # if(self.expression()):
+
+            if(self.match(";")):
+                self.getNextToken()
+            
+            return typeReturnExpresison
+                
+        self.throwSyntaxError()
     
     def callOrAssignStatement(self):
         if(self.identifier()):
-            self.getNextToken()
+            idType = self.getTypeId(self.actualToken)
+
+            self.getNextToken()  
 
             if(self.match("=")):
                 typeAssignment = self.assignStatement()
-                return True
+
+                #validar se id tem tipo declarado
+
+                #validar se id tem tipo igual ao da expressão
+                if(idType != typeAssignment):
+                    self.throwSemanticError()
+
+                return idType
             elif(self.callFunctionStatement()):
                 return True
         
-        return False
+        self.throwSyntaxError()
 
     def assignStatement(self):
         if(self.match("=")):
@@ -582,7 +596,7 @@ class Parser:
         elif(self.identifier()):
             self.getNextToken()
 
-            idType = self.getTypeId()
+            idType = self.getTypeId(self.actualToken)
 
             return idType
 
@@ -623,8 +637,10 @@ class Parser:
         
         return False
     
-    def getTypeId(self):
-        type = self.actualToken[4]
+    def getTypeId(self, idToken):
+        idIdx = idToken
+        symbolTableId = self.symbol_table.lookup(idIdx)
+        type = symbolTableId['type']
         return type
 
     def getId(self):
