@@ -69,7 +69,8 @@ class Lexer:
             new_context = self.next_context_to_create 
             
             if not new_context: 
-                new_context = self.context.symbol_table.return_last_inserted()
+                #new_context = self.context.symbol_table.return_last_inserted()
+                print('sem contexto novo')
                 
             new_context = self.context.generate_unique_name(new_context)
             
@@ -125,10 +126,12 @@ class Lexer:
         token_type = self.get_reserved_or_id(self.current_word)
         token_lexema = self.get_reserved_or_id(self.current_word)
         current_word = self.current_word if token_type == "id" else None
-
-        if token_lexema in ['meme', 'irineu_voce_sabe', 'nem_eu', 'surprise_mtfk', 'here_we_go_again']:
+        # if token_lexema in ['hora_do_show']:
+        #     self.next_context_to_create = 
+            
+        if token_lexema in ['meme', 'hora_do_show', 'irineu_voce_sabe', 'nem_eu', 'surprise_mtfk', 'here_we_go_again']:
             self.next_context_to_create = token_lexema
-        
+
         self.add_token(token_type, token_lexema, current_word)
         self.current_word = ''
 

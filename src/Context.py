@@ -4,7 +4,7 @@ class Context:
     def __init__(self, identifier: str, parent=None):
         self.identifier = identifier
         self.symbol_table = SymbolTable()
-        self.context_counter = 1
+        self.context_counter = 0
         self.subcontexts = [] 
         self.parent = parent 
 
@@ -16,7 +16,7 @@ class Context:
 
     def get_subcontext(self, identifier: str):
         for sub in self.subcontexts:
-            if sub.identifier == identifier:
+            if identifier in sub.identifier:
                 return sub
         return None
 
@@ -41,3 +41,9 @@ class Context:
     def generate_unique_name(self, base_name):
       unique_name = f"{self.context_counter}_{base_name}"
       return unique_name
+  
+    def context_hierarchy(self, context, depth=0):
+        indent = "    " * depth
+        print(f"{indent} -> {context.identifier}")
+        for subcontext in context.subcontexts:
+            self.context_hierarchy(subcontext, depth + 1)
