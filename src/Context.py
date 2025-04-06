@@ -5,6 +5,7 @@ class Context:
         self.identifier = identifier
         self.symbol_table = SymbolTable()
         self.context_counter = 0
+        self.current_context_counter = 0
         self.subcontexts = [] 
         self.parent = parent 
 
@@ -21,8 +22,12 @@ class Context:
         return None
 
     def add_symbol(self, id_name: str, linha: int, coluna: int):
-        if(self.symbol_table.idExists(id_name) == False):
+        idIdx = self.symbol_table.findIdIdx(id_name)
+        
+        if(idIdx == None):
             return self.symbol_table.add(id_name, linha, coluna)
+        else:
+            return idIdx
     
     def lookup(self, id_name: str):
         idx = self.symbol_table.lookup(id_name)

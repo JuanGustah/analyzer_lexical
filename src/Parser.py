@@ -7,6 +7,10 @@ class Type(Enum):
     BRUH = 1
     INT = 2
 
+class Nature(Enum):
+    FUNC = 1
+    VAR = 2
+
 # class Context(Enum):
 #     FUNCTION = 1
 #     LOOP = 2
@@ -27,9 +31,9 @@ class Parser:
         tokenString, line = self.actualToken[0], self.actualToken[1]
         
         if(tokenString == 'id' and matchString== 'id'):
-            idIndex = self.actualToken[1]
-            if(self.current_context.symbol_table.lookup(idIndex)):
-                return True
+            # idIndex = self.actualToken[1]
+            # if(self.current_context.symbol_table.lookup(idIndex)):
+            return True
         elif(tokenString == 'number' and matchString == 'number'):
             value = self.actualToken[1]
             if(value is not None):
@@ -111,7 +115,8 @@ class Parser:
     def body(self, context = None):
         if(self.match("{")):
             if self.next_context:
-                next_c = self.current_context.get_subcontext(self.next_context)
+                next_c = self.current_context.get_subcontext(f"{self.current_context.current_context_counter}_{self.next_context}")
+                next_c.parent.current_context_counter += 1
                 if next_c:
                     self.current_context = next_c
             
@@ -183,7 +188,11 @@ class Parser:
             self.getNextToken()  
 
             if self.identifier():
-                id = self.getId()
+                self.checkIdDuplicated(self.actualToken)
+
+                idToken = self.actualToken
+                
+                self.setIdNature(idToken, Nature.VAR)
 
                 self.getNextToken()  
 
@@ -194,7 +203,8 @@ class Parser:
                     if(typeAssignment != declarationVariableType):
                         self.throwSemanticError()
 
-                    self.setIdType(id, typeAssignment)
+                    self.setIdType(idToken, typeAssignment)
+
                     self.getNextToken()  
 
                     if self.match(";"):
@@ -334,17 +344,17 @@ class Parser:
             return self.jumpStopStatement()
         elif(self.match("irineu_voce_sabe")):
             return self.conditionStatement()
-        elif(self.match("here_we_go_again")):
-            return self.loopStatement()
+        # elif(self.match("here_we_go_again")):
+        #     return self.loopStatement()
         elif(self.match("amostradinho")):
             return self.printStatement()
         elif(self.match("casca_de_bala")):
             return self.readStatement()
-        elif(self.match("receba")):
-            return self.returnStatement()
-        elif(self.match("id")):
-            #falta finalizar
-            return self.callOrAssignStatement()
+        # elif(self.match("receba")):
+        #     return self.returnStatement()
+        # elif(self.match("id")):
+        #     #falta finalizar
+        #     return self.callOrAssignStatement()
 
         self.throwSyntaxError()
 
@@ -379,6 +389,8 @@ class Parser:
 
                 if(self.match(")")):
                     self.getNextToken()
+
+                    self.next_context = "irineu_voce_sabe"
 
                     self.body()
                     # if():
@@ -442,13 +454,14 @@ class Parser:
             if(self.match("(")):
                 self.getNextToken()
                 
-                if(self.expression()):
-                    if(self.match(")")):
-                        self.getNextToken()
+                self.expression()
 
-                        if(self.match(";")):
-                            self.getNextToken()
-                            return None
+                if(self.match(")")):
+                    self.getNextToken()
+
+                    if(self.match(";")):
+                        self.getNextToken()
+                        return None
         self.throwSyntaxError()
     
     def readStatement(self):
@@ -459,6 +472,8 @@ class Parser:
                 self.getNextToken()
 
                 if(self.identifier()):
+                    self.checkIfIsDeclared(self.actualToken)
+
                     self.getNextToken()
                     
                     if(self.match(")")):
@@ -486,6 +501,8 @@ class Parser:
     
     def callOrAssignStatement(self):
         if(self.identifier()):
+            self.checkIfIsDeclared(self.actualToken)
+
             idType = self.getTypeId(self.actualToken)
 
             self.getNextToken()  
@@ -493,11 +510,12 @@ class Parser:
             if(self.match("=")):
                 typeAssignment = self.assignStatement()
 
-                #validar se id tem tipo declarado
-
                 #validar se id tem tipo igual ao da expressão
                 if(idType != typeAssignment):
                     self.throwSemanticError()
+
+                if(self.match(";")):
+                    self.getNextToken()
 
                 return idType
             elif(self.callFunctionStatement()):
@@ -636,9 +654,11 @@ class Parser:
             return Type.INT
             # return True
         elif(self.identifier()):
-            self.getNextToken()
+            self.checkIfIsDeclared(self.actualToken)
 
             idType = self.getTypeId(self.actualToken)
+
+            self.getNextToken()
 
             return idType
 
@@ -680,18 +700,42 @@ class Parser:
         return False
     
     def getTypeId(self, idToken):
-        idIdx = idToken
+        idIdx = idToken[1]
         symbolTableId = self.current_context.symbol_table.lookup(idIdx)
         type = symbolTableId['type']
         return type
 
-    def getId(self):
-        return self.actualToken
-    
     def setIdType(self, id, newType):
         #id actualToken antigo
         #actualToken[1] = idx da symbolTable
         self.current_context.symbol_table.setType(id[1],newType)
+    
+    def setIdNature(self, id, newNature):
+        self.current_context.symbol_table.setNature(id[1],newNature)
+
+    def checkIdDuplicated(self,idToken):
+        idIdx = idToken[1]
+        idTokenLine = idToken[3]
+        idTokencolumn = idToken[4]
+
+        symbolTableId = self.current_context.symbol_table.lookup(idIdx)
+        idStLine= symbolTableId['linha']
+        idStColumn= symbolTableId['coluna']
+
+        if(idTokenLine != idStLine or idTokencolumn != idStColumn):
+            self.throwSemanticError()
+
+    def checkIfIsDeclared(self, idToken):
+        idIdx = self.actualToken[1]
+        idTokenLine = idToken[3]
+        idTokencolumn = idToken[4]
+
+        symbolTableId = self.current_context.symbol_table.lookup(idIdx)
+        idStLine= symbolTableId['linha']
+        idStColumn= symbolTableId['coluna']
+
+        if(idTokenLine == idStLine or idTokencolumn == idStColumn):
+            self.throwSemanticError()
 
     def throwSyntaxError(self):
         raise Exception(f"SyntaxError → Token = {self.actualToken[2]}, Linha = {self.actualToken[3]}")

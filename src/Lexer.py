@@ -248,7 +248,7 @@ class Lexer:
             value = index
 
         #self.tokens.append(([token_type, value, lexema], self.line_number))
-        self.tokens.append((token_type, value, lexema, self.line_number))
+        self.tokens.append((token_type, value, lexema, self.line_number, self.head_position))
 
     def current_char(self):
         return self.line[self.head_position] if self.head_position < len(self.line) else None

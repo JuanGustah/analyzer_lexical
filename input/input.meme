@@ -1,5 +1,6 @@
 meme {
-  int x = 1+1;
-  bruh y;
-  amostradinho(1);
+  int x = 2;
+  irineu_voce_sabe(real){
+    amostradinho(2);
+  }
 }
