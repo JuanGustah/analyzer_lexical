@@ -9,11 +9,7 @@ class Type(Enum):
 
 class Nature(Enum):
     FUNC = 1
-    VAR = 2
-
-# class Context(Enum):
-#     FUNCTION = 1
-#     LOOP = 2
+    LOOP = 2
 
 class Parser:
     def __init__(self, tokens, context: Context):
@@ -107,16 +103,17 @@ class Parser:
             self.next_context = 'meme'
             self.getNextToken()
 
-            return self.body("meme")
+            return self.body()
             
         
         self.throwSyntaxError()
     
-    def body(self, context = None):
+    def body(self, nature = None):
         if(self.match("{")):
             if self.next_context:
                 next_c = self.current_context.get_subcontext(f"{self.current_context.current_context_counter}_{self.next_context}")
                 next_c.parent.current_context_counter += 1
+                next_c.nature = nature
                 if next_c:
                     self.current_context = next_c
             
@@ -131,8 +128,8 @@ class Parser:
                 #     else:
                 #         return False
 
-            if self.hasStatement(context):
-                self.statements(context)
+            if self.hasStatement():
+                self.statements()
 
                 if self.match("}"):
                     self.current_context = self.current_context.parent
@@ -192,8 +189,6 @@ class Parser:
 
                 idToken = self.actualToken
                 
-                self.setIdNature(idToken, Nature.VAR)
-
                 self.getNextToken()  
 
                 if self.match("="):
@@ -304,14 +299,14 @@ class Parser:
     #         return True
     #     return False
 
-    def statements(self, context = None):
+    def statements(self):
         #adicionar validação para return/receba e chamada de função
         typeStatement = self.statement()
 
-        if self.hasStatement(context):
+        if self.hasStatement():
             self.statements()
 
-    def hasStatement(self, context = None):
+    def hasStatement(self):
         if(self.match("irineu_voce_sabe")):
             return True
         elif(self.match("here_we_go_again")):
@@ -324,13 +319,13 @@ class Parser:
             #deve validar se está em contexto de função
             return True
         elif(self.match("papapare")):
-            if(context != Context.LOOP):
+            if(self.current_context.nature != Nature.LOOP):
                 self.throwSemanticError()
                 return False
 
             return True
         elif(self.match("ate_outro_dia")):
-            if(context != Context.LOOP):
+            if(self.current_context.nature != Nature.LOOP):
                 self.throwSemanticError()
                 return False
 
@@ -344,8 +339,8 @@ class Parser:
             return self.jumpStopStatement()
         elif(self.match("irineu_voce_sabe")):
             return self.conditionStatement()
-        # elif(self.match("here_we_go_again")):
-        #     return self.loopStatement()
+        elif(self.match("here_we_go_again")):
+            return self.loopStatement()
         elif(self.match("amostradinho")):
             return self.printStatement()
         elif(self.match("casca_de_bala")):
@@ -353,7 +348,7 @@ class Parser:
         # elif(self.match("receba")):
         #     return self.returnStatement()
         # elif(self.match("id")):
-        #     #falta finalizar
+        #     #falta finalizar a parte de chamada de função
         #     return self.callOrAssignStatement()
 
         self.throwSyntaxError()
@@ -398,9 +393,9 @@ class Parser:
 
                     # if(self.lookAhead("nem_eu")):
                     if(self.match("nem_eu")):
-
                         self.getNextToken()
 
+                        self.next_context = "nem_eu"
                         self.body()
                         # if():
                         return None
@@ -424,7 +419,8 @@ class Parser:
                     self.getNextToken()
 
                     # if():
-                    self.body(Context.LOOP)
+                    self.next_context = "here_we_go_again"
+                    self.body(Nature.LOOP)
                     self.getNextToken()
 
                     return None
@@ -709,9 +705,6 @@ class Parser:
         #id actualToken antigo
         #actualToken[1] = idx da symbolTable
         self.current_context.symbol_table.setType(id[1],newType)
-    
-    def setIdNature(self, id, newNature):
-        self.current_context.symbol_table.setNature(id[1],newNature)
 
     def checkIdDuplicated(self,idToken):
         idIdx = idToken[1]

@@ -8,6 +8,7 @@ class Context:
         self.current_context_counter = 0
         self.subcontexts = [] 
         self.parent = parent 
+        self.nature = None
 
     def add_subcontext(self, subcontext_name: str):
         new_subcontext = Context(subcontext_name, parent=self)
