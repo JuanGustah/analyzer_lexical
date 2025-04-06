@@ -21,7 +21,8 @@ class Context:
         return None
 
     def add_symbol(self, id_name: str, linha: int, coluna: int):
-        return self.symbol_table.add(id_name, linha, coluna)
+        if(self.symbol_table.idExists(id_name) == False):
+            return self.symbol_table.add(id_name, linha, coluna)
     
     def lookup(self, id_name: str):
         idx = self.symbol_table.lookup(id_name)

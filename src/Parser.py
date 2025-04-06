@@ -113,7 +113,7 @@ class Parser:
             if self.next_context:
                 next_c = self.current_context.get_subcontext(self.next_context)
                 if next_c:
-                    self.current_context = self.next_context
+                    self.current_context = next_c
             
             self.getNextToken()
 
