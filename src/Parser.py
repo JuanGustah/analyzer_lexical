@@ -25,9 +25,9 @@ class Parser:
     def log_calls(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            logging.debug(f">>> Entrando em {func.__name__}")
+            # logging.debug(f">>> Entrando em {func.__name__}")
             result = func(*args, **kwargs)
-            logging.debug(f"<<< Saindo de {func.__name__}")
+            # logging.debug(f"<<< Saindo de {func.__name__}")
             return result
         return wrapper
     
@@ -83,6 +83,7 @@ class Parser:
 
             if self.program():
                 logging.info("\033[92m[ok] Execução bem-sucedida: Deu bom!\033[0m")  
+                self.generator.print_instructions()
                 return True
             else:
                 

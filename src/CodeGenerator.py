@@ -16,3 +16,8 @@ class CodeGenerator:
     
     def emit(self, instruction):
         self.instructions.append(instruction)
+        
+    def print_instructions(self):
+        print("\nCódigo de Três Endereços Gerado:")
+        for idx, instr in enumerate(self.instructions, 1):
+            print(f"{idx}: {instr}")
