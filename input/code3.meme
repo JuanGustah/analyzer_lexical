@@ -11,7 +11,6 @@ int hora_do_show soma1() {
 
 int hora_do_show soma2(int x, int y) {
 
-
     int sum = 30; bruh teste = real; bruh teste3 = barca;
     int soma; int soma3;
 

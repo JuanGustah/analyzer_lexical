@@ -1,24 +1,26 @@
 from tabulate import tabulate
 from enum import Enum
 
+from Context import Context
+
 class Type(Enum):
     BRUH = 1
     INT = 2
 
-class Context(Enum):
-    FUNCTION = 1
-    LOOP = 2
+# class Context(Enum):
+#     FUNCTION = 1
+#     LOOP = 2
 
 class Parser:
-    def __init__(self, tokens, symbol_table):
+    def __init__(self, tokens, context: Context):
         self.tokens = tokens
-        self.symbol_table = symbol_table
+        self.current_context = context
+        self.next_context = None
         self.actualTokenPos = -1
         self.actualToken = []
         self.structure_print = []
 
-    def print_all(self):
-        
+    def print_all(self): 
         print(tabulate(self.structure_print, headers=["Tipo", "Valor", "Lexema", "Linha"], tablefmt="grid"))
 
     def match(self, matchString):
@@ -26,7 +28,7 @@ class Parser:
         
         if(tokenString == 'id' and matchString== 'id'):
             idIndex = self.actualToken[1]
-            if(self.symbol_table.lookup(idIndex)):
+            if(self.current_context.symbol_table.lookup(idIndex)):
                 return True
         elif(tokenString == 'number' and matchString == 'number'):
             value = self.actualToken[1]
@@ -98,15 +100,21 @@ class Parser:
 
     def mainBody(self):
         if(self.match("meme")):
+            self.next_context = 'meme'
             self.getNextToken()
 
-            return self.body()
+            return self.body("meme")
             
         
         self.throwSyntaxError()
     
     def body(self, context = None):
         if(self.match("{")):
+            if self.next_context:
+                next_c = self.current_context.get_subcontext(self.next_context)
+                if next_c:
+                    self.current_context = self.next_context
+            
             self.getNextToken()
 
             if(self.checkType()):
@@ -122,6 +130,7 @@ class Parser:
                 self.statements(context)
 
                 if self.match("}"):
+                    self.current_context = self.current_context.parent
                     return None
             
             self.throwSyntaxError()
@@ -246,7 +255,8 @@ class Parser:
             self.getNextToken()
             if self.match('hora_do_show'):
                 self.getNextToken()
-                if self.identifier(): 
+                if self.identifier():
+                    self.next_context = self.identifier() 
                     self.getNextToken()
                     if self.match('('):  
                         self.getNextToken()
@@ -671,7 +681,7 @@ class Parser:
     
     def getTypeId(self, idToken):
         idIdx = idToken
-        symbolTableId = self.symbol_table.lookup(idIdx)
+        symbolTableId = self.current_context.symbol_table.lookup(idIdx)
         type = symbolTableId['type']
         return type
 
@@ -681,7 +691,7 @@ class Parser:
     def setIdType(self, id, newType):
         #id actualToken antigo
         #actualToken[1] = idx da symbolTable
-        self.symbol_table.setType(id[1],newType)
+        self.current_context.symbol_table.setType(id[1],newType)
 
     def throwSyntaxError(self):
         raise Exception(f"SyntaxError → Token = {self.actualToken[2]}, Linha = {self.actualToken[3]}")

@@ -1,6 +1,6 @@
 import re
 from SymbolTable import SymbolTable
-
+from Context import Context
 # Constantes para identificação de padrões
 DIGIT = r'[0-9]'
 WORD = r'[a-zA-Z0-9_]'
@@ -19,7 +19,9 @@ class Lexer:
         self.line_number = 0
         self.head_position = 0
         self.line = ''
-        self.symbol_table = SymbolTable()
+        #self.symbol_table = SymbolTable()
+        self.context = Context('global')
+        self.next_context_to_create = None
 
     def start(self):
         with open(self.file_path, 'r') as file:
@@ -64,9 +66,23 @@ class Lexer:
             self.forward_head() 
             return self.q11() 
         elif char == '{': 
+            new_context = self.next_context_to_create 
+            
+            if not new_context: 
+                #new_context = self.context.symbol_table.return_last_inserted()
+                print('sem contexto novo')
+                
+            new_context = self.context.generate_unique_name(new_context)
+            
+            self.context.add_subcontext(new_context)
+            self.context = self.context.get_subcontext(new_context)
+            ## Pegar o identificador mais proximo anterior
+            self.next_context_to_create = None
+            
             self.forward_head() 
             return self.q12() 
-        elif char == '}': 
+        elif char == '}':
+            self.context = self.context.parent 
             self.forward_head() 
             return self.q13() 
         elif char == ';': 
@@ -110,6 +126,11 @@ class Lexer:
         token_type = self.get_reserved_or_id(self.current_word)
         token_lexema = self.get_reserved_or_id(self.current_word)
         current_word = self.current_word if token_type == "id" else None
+        # if token_lexema in ['hora_do_show']:
+        #     self.next_context_to_create = 
+            
+        if token_lexema in ['meme', 'hora_do_show', 'irineu_voce_sabe', 'nem_eu', 'surprise_mtfk', 'here_we_go_again']:
+            self.next_context_to_create = token_lexema
 
         self.add_token(token_type, token_lexema, current_word)
         self.current_word = ''
@@ -223,7 +244,7 @@ class Lexer:
         
     def add_token(self, token_type, lexema=None, value=None):
         if token_type == 'id':
-            index = self.symbol_table.add(value, self.line_number, self.head_position)
+            index = self.context.add_symbol(value, self.line_number, self.head_position)
             value = index
 
         #self.tokens.append(([token_type, value, lexema], self.line_number))
@@ -240,5 +261,5 @@ class Lexer:
         for token in self.tokens:
             print(token)
 
-    def display_symbol_table(self):
-        self.symbol_table.list()
+    # def display_symbol_table(self):
+    #     self.symbol_table.list()

@@ -2,13 +2,16 @@ from tabulate import tabulate
 
 class SymbolTable:
     def __init__(self):
-        self.table: list = []
+        self.table: list = [] # identificadores
 
     def add(self, id_name: str, linha: int, coluna: int):
         index = len(self.table)
         self.table.append({'id': id_name, 'linha': linha, 'coluna': coluna, 'type': None})
         return index
-
+    
+    def return_last_inserted(self):
+        return self.table[-1]['id'] 
+    
     def lookup(self, idx: int):
         if idx < len(self.table):
             return self.table[idx]

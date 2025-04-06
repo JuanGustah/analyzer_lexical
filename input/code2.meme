@@ -11,6 +11,8 @@ int hora_do_show soma1() {
 void hora_do_show procedimento2() {
     int soma;
     amostradinho(real);
+
+    
 }
 
 meme {
@@ -18,5 +20,20 @@ meme {
     int teste; int dsadsa;
 
     amostradinho(real);
+
+    irineu_voce_sabe (x > 0) {
+        amostradinho(x);
+        
+    } 
+    nem_eu {
+        amostradinho(-1);
+    }
+    irineu_voce_sabe (x > 0) {
+        amostradinho(x);
+        
+    } 
+    nem_eu {
+        amostradinho(-1);
+    }
 
 }
