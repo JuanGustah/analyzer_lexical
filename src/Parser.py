@@ -19,7 +19,7 @@ class Parser:
         self.next_context:      Context = None
         self.actualTokenPos:    int = -1
         self.actualToken:       Token = None
-        self.generator:         CodeGenerator = None
+        self.generator:         CodeGenerator = CodeGenerator()
         
 
     def log_calls(func):
@@ -38,7 +38,7 @@ class Parser:
             return False
         
         tipo = self.actualToken.tipo
-    
+
         if(tipo == 'id' and match == 'id'):
             # idIndex = self.actualToken[1]
             # if(self.current_context.symbol_table.lookup(idIndex)):
@@ -228,17 +228,15 @@ class Parser:
 
                     self.generator.emit(f"{idToken.lexema} = {temp}")
                     #self.setIdType(idToken, typeAssignment)
-                    self.getNextToken()  
 
                     if self.match(";"):
                         self.getNextToken()  
 
-                    # return True
+                    return None
 
                 if self.match(";"):
-                    #self.setIdType(id, declarationVariableType)
-                    self.getNextToken()     
-                    # return True
+                    self.setIdType(id, declarationVariableType)
+                    return None
             # return False
         # return False
     
@@ -604,6 +602,7 @@ class Parser:
             self.getNextToken()
 
             typeExpression, temp = self.expression()
+
             return typeExpression, temp
             # if(self.expression()):
             #     return True
@@ -650,26 +649,26 @@ class Parser:
             temp = self.generator.gen_temp()
             self.generator.emit(f'{temp} = {temp1} {operator} {temp2}')
             
-            return typeAnotherExpression
+            return typeAnotherExpression, temp
         
-        return typeFirstExpression
+        return typeFirstExpression, temp1
 
     @log_calls
     def simpleExpression(self):
         logging.info(f'simpleExpression')
-        typeUnaryOperator = self.unaryOperator()
+        typeUnaryOperator, unaryOperator = self.unaryOperator()
         
+        print(f"unaryOperator {unaryOperator}")
         typeTerm, temp = self.term()
 
         # if(self.term()):
         #     return True
-
         if(typeUnaryOperator != None and typeUnaryOperator != typeTerm):
             self.throwSemanticError()
         
         if typeUnaryOperator:
             new_temp = self.generator.gen_temp()
-            self.generator.emit(f"{new_temp} = {typeUnaryOperator} {temp}")
+            self.generator.emit(f"{new_temp} = {unaryOperator} {temp}")
         
         return typeTerm, temp
 
@@ -678,14 +677,14 @@ class Parser:
         logging.info(f'unaryOperator')
         if self.match("+"):
             self.getNextToken()
-            return "+"
+            return Tipo.INT, "+"
         elif self.match("-"):
             self.getNextToken()
-            return "-"
+            return Tipo.INT,"-"
         elif self.match("!"):
             self.getNextToken()
-            return "!"
-        return None
+            return Tipo.BRUH, "!"
+        return None, None
     
     @log_calls
     def assignOperator(self):
@@ -712,9 +711,6 @@ class Parser:
     def term(self):
         logging.info(f'term {self.actualToken.lexema}')
         typeFactor, temp1 = self.factor()
-        
-        if(typeFactor == Tipo.BRUH):
-                self.throwSemanticError()
                 
         if(self.match('+') or self.match('-') or self.match('*') or self.match('/')):
             operator = self.actualToken.lexema
