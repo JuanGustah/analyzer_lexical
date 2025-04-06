@@ -1,10 +1,6 @@
 meme {
-  int x = 1+1;
-  bruh y;
+  int x = 2;
   irineu_voce_sabe(real){
-    amostradinho(1);
-  }
-  here_we_go_again(real){
-    amostradinho(1);
+    amostradinho(2);
   }
 }

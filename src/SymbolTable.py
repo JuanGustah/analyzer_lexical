@@ -20,6 +20,12 @@ class SymbolTable:
     def setType(self,idx,newType):
         self.table[idx]['type'] = newType
 
+    def findIdIdx(self, idName):
+        for i in range(len(self.table)):
+            if self.table[i]['id'] == idName:
+                return i
+        return None
+    
     def list(self):
         headers = ["idx", "id", "linha", "coluna", "type"]
         data = [[i, symbol['id'], symbol['linha'], symbol['coluna'], symbol['type']] for i, symbol in enumerate(self.table)]
