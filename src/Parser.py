@@ -83,25 +83,27 @@ class Parser:
     def program(self):
         self.getNextToken()
         
-        while self.checkType() or self.match('void'):  
-            if self.subRoutineStep():
-                self.getNextToken()
-                continue
-            else:
+        if self.checkType() or self.match('void'):
+            self.subRoutineStep()
+            # if self.subRoutineStep():
+                # self.getNextToken()
+                # continue
+            # else:
                 
-                return False  
+            #     return False  
 
-        if self.mainBody(): 
-            return True
-        return False
+        self.mainBody()
+
+        return True
 
     def mainBody(self):
         if(self.match("meme")):
             self.getNextToken()
 
-            if(self.body()):
-                return True
-        return False 
+            return self.body()
+            
+        
+        self.throwSyntaxError()
     
     def body(self, context = None):
         if(self.match("{")):
@@ -118,22 +120,30 @@ class Parser:
 
             if self.hasStatement(context):
                 self.statements(context)
+
                 if self.match("}"):
-                    return True
+                    return None
             
-            return False
+            self.throwSyntaxError()
             # if(self.statements()):
             #     if(self.match("}")):
             #         return True
             # else:
             #     return False
-        return False
+        self.throwSyntaxError()
 
     def subRoutineStep(self):      
-        if self.declarationFunctionProcedure():
-            return True
+        if(self.match('void')):
+            self.declarationProcedure()
+        elif(self.checkType()):
+            self.declarationFunction()
+
+        if(self.checkType() or self.match('void')):
+            self.subRoutineStep()
+        # if self.declarationFunctionProcedure():
+        #     return True
         
-        return False
+        # return False
     
     def declarationVariableStep(self):
         self.declarationVariable()
@@ -193,18 +203,45 @@ class Parser:
     def declarationParameters(self):
         if(self.checkType()):
             self.getNextToken()
+            
             if(self.identifier()):
                 self.getNextToken()
+            else:
+                self.throwSyntaxError()
                 
-            while self.match(','):
+            if(self.match(',')):
                 self.getNextToken()
-                self.declarationParameters()
-                
-            return True
-        
-        return False
+
+                if(self.checkType()):
+                    return self.declarationParameters()
+                self.throwSyntaxError()
+            else:
+                return None
     
-    def declarationFunctionProcedure(self):
+    def declarationFunction(self):
+        if self.checkType():  
+            self.getNextToken()
+            if self.match('hora_do_show'):
+                self.getNextToken()
+                if self.identifier(): 
+                    self.getNextToken()
+                    if self.match('('):  
+                        self.getNextToken()
+
+                        self.declarationParameters()
+
+                        if self.match(')'): 
+                            self.getNextToken()
+
+                            self.body()
+                            
+                            self.getNextToken()
+
+                            return None
+                            
+        self.throwSyntaxError()
+
+    def declarationProcedure(self):
         if self.match("void"):
             self.getNextToken()
             if self.match('hora_do_show'):
@@ -217,27 +254,14 @@ class Parser:
                             pass  
                         if self.match(')'):  
                             self.getNextToken()
-                            if self.body():  
-                                return True
-            return False
 
-        if self.checkType():  
-            self.getNextToken()
-            if self.match('hora_do_show'):
-                self.getNextToken()
-                if self.identifier(): 
-                    self.getNextToken()
-                    if self.match('('):  
-                        self.getNextToken()
-                        if self.declarationParameters():  
-                            pass  
-                        if self.match(')'): 
+                            self.body()
+                            
                             self.getNextToken()
-                            if self.body():
-                                return True
-            return False
 
-            
+                            return None
+                            
+        self.throwSyntaxError()
     
     # ==================================== COMANDOS =============================================== #
     
@@ -262,7 +286,6 @@ class Parser:
 
     def statements(self, context = None):
         #adicionar validação para return/receba e chamada de função
-        # print(self.actualToken)
         typeStatement = self.statement()
 
         if self.hasStatement(context):
@@ -347,16 +370,20 @@ class Parser:
                 if(self.match(")")):
                     self.getNextToken()
 
-                    if(self.body()):
+                    self.body()
+                    # if():
+                    self.getNextToken()
+
+                    # if(self.lookAhead("nem_eu")):
+                    if(self.match("nem_eu")):
+
                         self.getNextToken()
-                        # if(self.lookAhead("nem_eu")):
-                        if(self.match("nem_eu")):
-                            self.getNextToken()
 
-                            if(self.body()):
-                                return None
-
+                        self.body()
+                        # if():
                         return None
+
+                    return None
         self.throwSyntaxError()
     
     def loopStatement(self):
@@ -364,16 +391,21 @@ class Parser:
             self.getNextToken()
 
             if(self.match("(")):
-                self.getNextToken()
+                self.getNextToken() 
 
-                if(self.expression()):
-                    if(self.match(")")):
-                        self.getNextToken()
+                expressionType = self.expression()
 
-                        if(self.body(Context.LOOP)):
-                            self.getNextToken()
+                if(expressionType != Type.BRUH):
+                    self.throwSemanticError()
 
-                            return None
+                if(self.match(")")):
+                    self.getNextToken()
+
+                    # if():
+                    self.body(Context.LOOP)
+                    self.getNextToken()
+
+                    return None
                         
         self.throwSyntaxError()
     
