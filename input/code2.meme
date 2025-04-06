@@ -1,20 +1,3 @@
-int hora_do_show soma1() {
-
-    int sum = 30; bruh teste = real; bruh teste3 = barca;
-    int soma; int soma3;
-    int soma2 = 20;
-    
-    amostradinho(real);
-    
-}
-
-void hora_do_show procedimento2() {
-    int soma;
-    amostradinho(real);
-
-    
-}
-
 meme {
     int teste3;
     int teste; int dsadsa;

@@ -1,8 +1,3 @@
-int hora_do_show soma(int a, int b){
-  int resultado = a + b;
-  receba resultado;
-}
-
 meme {
   int x = 2;
   bruh printar;
@@ -20,5 +15,15 @@ meme {
     amostradinho(-1);
   }
 
-  
+  suprise_mtfk {
+    amostradinho(x);
+  } here_we_go_again(x > 0){
+    amostradinho(x);
+    papapare
+  }
+
+  here_we_go_again (x > 0) {
+      amostradinho(x);
+      x = x - 1;
+  }
 }

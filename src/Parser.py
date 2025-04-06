@@ -1,15 +1,7 @@
 from tabulate import tabulate
-from enum import Enum
 
-from Context import Context
-
-class Type(Enum):
-    BRUH = 1
-    INT = 2
-
-class Nature(Enum):
-    FUNC = 1
-    LOOP = 2
+from tipos.Context import Context
+from tipos import Nature, Tipo
 
 class Parser:
     def __init__(self, tokens, context: Context):
@@ -173,9 +165,9 @@ class Parser:
     
     def type(self):
         if(self.match("int")):
-            return Type.INT
+            return Tipo.INT
         elif(self.match("bruh")):
-            return Type.BRUH
+            return Tipo.BRUH
         
         self.throwSemanticError()
     
@@ -379,7 +371,7 @@ class Parser:
                 expressionType = self.expression()
                 # if(self.expression()):
 
-                if(expressionType != Type.BRUH):
+                if(expressionType != Tipo.BRUH):
                     self.throwSemanticError()
 
                 if(self.match(")")):
@@ -412,7 +404,7 @@ class Parser:
 
                 expressionType = self.expression()
 
-                if(expressionType != Type.BRUH):
+                if(expressionType != Tipo.BRUH):
                     self.throwSemanticError()
 
                 if(self.match(")")):
@@ -553,14 +545,14 @@ class Parser:
         typeFirstExpression = self.simpleExpression()
 
         if(self.assignOperator()):
-            if(typeFirstExpression == Type.INT):
+            if(typeFirstExpression == Tipo.INT):
                 self.throwSemanticError()
 
             self.getNextToken()
                 
             typeAnotherExpression = self.simpleExpression()
 
-            if(typeFirstExpression == Type.INT):
+            if(typeFirstExpression == Tipo.INT):
                 self.throwSemanticError()
 
             return typeAnotherExpression
@@ -583,13 +575,13 @@ class Parser:
     def unaryOperator(self):
         if(self.match("+")):
             self.getNextToken()
-            return Type.INT
+            return Tipo.INT
         elif(self.match("-")):
             self.getNextToken()
-            return Type.INT
+            return Tipo.INT
         elif(self.match("!")):
             self.getNextToken()
-            return Type.BRUH
+            return Tipo.BRUH
 
         return None
     
@@ -617,13 +609,13 @@ class Parser:
         typeFactor = self.factor()
 
         if(self.match('+') or self.match('-') or self.match('*') or self.match('/')):
-            if(typeFactor == Type.BRUH):
+            if(typeFactor == Tipo.BRUH):
                 self.throwSemanticError()
             
             self.getNextToken()
             typeTerm = self.term()
             
-            if(typeTerm == Type.BRUH):
+            if(typeTerm == Tipo.BRUH):
                 self.throwSemanticError()
         
         return typeFactor
@@ -638,16 +630,16 @@ class Parser:
     def factor(self):
         if(self.match("real")):
             self.getNextToken()
-            return Type.BRUH
+            return Tipo.BRUH
             # return True
         elif(self.match("barca")):
             self.getNextToken()
-            return Type.BRUH
+            return Tipo.BRUH
             # return True
         elif(self.number()):
             self.getNextToken()
 
-            return Type.INT
+            return Tipo.INT
             # return True
         elif(self.identifier()):
             self.checkIfIsDeclared(self.actualToken)

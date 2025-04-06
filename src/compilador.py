@@ -2,15 +2,16 @@ from Lexer import Lexer
 from Parser import Parser
 
 if __name__ == "__main__":
-    lexer = Lexer("input/input.meme")
+    lexer = Lexer("input/functions.meme")
     lexer.start()
-    #lexer.display_tokens()
-    #lexer.context.list_symbols()
-    lexer.context.context_hierarchy(lexer.context)
+    lexer.display_tokens()
+    lexer.context.list_symbols()
+    #lexer.context.context_hierarchy(lexer.context)
     #print('Leitura no Parser')
-    parser = Parser(lexer.tokens, lexer.context)
-    parser.start()
+    #parser = Parser(lexer.tokens, lexer.context)
+    
+    #parser.start()
+    #parser.gerar_saida()
+    #parser.current_context.list_symbols()
 
     #lexer.display_symbol_table()
-
-    # parser.print_all()

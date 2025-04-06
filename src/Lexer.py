@@ -1,6 +1,11 @@
 import re
-from SymbolTable import SymbolTable
-from Context import Context
+
+from typing import List
+from tabulate import tabulate
+
+from tipos import Identifier, Token
+from tipos import Context
+
 # Constantes para identificação de padrões
 DIGIT = r'[0-9]'
 WORD = r'[a-zA-Z0-9_]'
@@ -13,15 +18,14 @@ RESERVED_WORDS = {
 
 class Lexer:
     def __init__(self, file_path):
-        self.file_path = file_path
-        self.tokens = []
-        self.current_word = ''
-        self.line_number = 0
-        self.head_position = 0
-        self.line = ''
-        #self.symbol_table = SymbolTable()
-        self.context = Context('global')
-        self.next_context_to_create = None
+        self.file_path:                 str         = file_path
+        self.tokens:                    List[Token] = []
+        self.current_word:              str         = ''
+        self.line_number:               int         = 0
+        self.head_position:             int         = 0
+        self.line:                      str         = ''
+        self.context:                   Context     = Context('global')
+        self.next_context_to_create:    str         = ''
 
     def start(self):
         with open(self.file_path, 'r') as file:
@@ -69,7 +73,6 @@ class Lexer:
             new_context = self.next_context_to_create 
             
             if not new_context: 
-                #new_context = self.context.symbol_table.return_last_inserted()
                 print('sem contexto novo')
                 
             new_context = self.context.generate_unique_name(new_context)
@@ -124,15 +127,13 @@ class Lexer:
 
     def q02(self):
         token_type = self.get_reserved_or_id(self.current_word)
-        token_lexema = self.get_reserved_or_id(self.current_word)
+        token_lexema = self.current_word
         current_word = self.current_word if token_type == "id" else None
-        # if token_lexema in ['hora_do_show']:
-        #     self.next_context_to_create = 
             
         if token_lexema in ['meme', 'hora_do_show', 'irineu_voce_sabe', 'nem_eu', 'surprise_mtfk', 'here_we_go_again']:
             self.next_context_to_create = token_lexema
 
-        self.add_token(token_type, token_lexema, current_word)
+        self.add_token(token_type, self.current_word, current_word)
         self.current_word = ''
 
         return True
@@ -243,12 +244,37 @@ class Lexer:
         return word if word in RESERVED_WORDS else 'id'
         
     def add_token(self, token_type, lexema=None, value=None):
+        # verificar se o token é identificador sim = salvar na tabela de simbolos
         if token_type == 'id':
-            index = self.context.add_symbol(value, self.line_number, self.head_position)
-            value = index
+            register = Identifier(
+                self.line_number+self.head_position, 
+                lexema, 
+                self.line_number, 
+                self.head_position, 
+                None
+            )
+            
+            inserted_reg = self.context.add_reg(register)
 
-        #self.tokens.append(([token_type, value, lexema], self.line_number))
-        self.tokens.append((token_type, value, lexema, self.line_number, self.head_position))
+            self.tokens.append(
+                Token(
+                    token_type, 
+                    lexema, 
+                    inserted_reg.cod, 
+                    self.line_number, 
+                    self.head_position
+                )
+            )
+            
+        self.tokens.append(
+                Token(
+                    token_type, 
+                    lexema, 
+                    None, 
+                    self.line_number, 
+                    self.head_position
+                )
+            )
 
     def current_char(self):
         return self.line[self.head_position] if self.head_position < len(self.line) else None
@@ -257,9 +283,10 @@ class Lexer:
         self.head_position += 1
 
     def display_tokens(self):
-        print("\nTokens:")
-        for token in self.tokens:
-            print(token)
-
-    # def display_symbol_table(self):
-    #     self.symbol_table.list()
+        print('\t\t\t TOKENS')
+        headers = ["Tipo", "Lexema", "Indice", "Linha", "Coluna"]
+        table = [
+            [token.tipo, token.lexema, token.indice_tabela, token.linha, token.coluna]
+            for token in self.tokens
+        ]
+        print(tabulate(table, headers=headers, tablefmt="grid"))
