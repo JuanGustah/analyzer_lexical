@@ -1,11 +1,3 @@
 meme {
   int x = 2;
-
-  irineu_voce_sabe (x > 0) {
-    amostradinho(x);
-  } nem_eu {
-    amostradinho(-1);
-  }
-
-  
 }
