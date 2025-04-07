@@ -11,6 +11,6 @@ if __name__ == "__main__":
     parser = Parser(lexer.tokens, lexer.context)
     
     parser.start()
-    parser.global_context.list_symbols()
+    # parser.global_context.list_symbols()
 
     #lexer.display_symbol_table()

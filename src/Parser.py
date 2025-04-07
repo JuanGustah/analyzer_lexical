@@ -440,15 +440,14 @@ class Parser:
                 # if(self.expression()):
 
                 # irineu_voce_sabe (x == 2) - comparar inteiros
-                # if(expressionType != Tipo.BRUH):
-                #     self.throwSemanticError()
+                if(expressionType != Tipo.BRUH):
+                    self.throwSemanticError()
 
                 if(self.match(")")):
                     self.getNextToken()
                     
                     label_else = self.generator.gen_label()
                     label_end = self.generator.gen_label()
-                    print(f"CIMAAAAAAAA if {temp} goto {label_else}")
                     #self.generator.emit(f"if {temp} == 0 goto {label_else}")
                     self.generator.emit(f"if {temp} goto {label_else}")
                     
@@ -695,25 +694,22 @@ class Parser:
 
         # if(self.simpleExpression()):
         typeFirstExpression, temp1 = self.simpleExpression()
-        operator = self.assignOperator()
-        #verificar a frente se tem  + - * /
+        operator, operatorType = self.assignOperator()
         if operator:
-            #X é inteiro entao throw? --> here_we_go_again (x > 0) x tem que ser inteiro aqui
-            # if(typeFirstExpression == Tipo.INT):
-            #     self.throwSemanticError()
-
             self.getNextToken()
                 
             typeAnotherExpression, temp2 = self.simpleExpression()
-            # here_we_go_again (x > 0) 
-            # if(typeFirstExpression == Tipo.INT):
-            #     self.throwSemanticError()
+            
+            if typeFirstExpression != typeAnotherExpression:
+                self.throwSemanticError()
+            elif typeFirstExpression != operatorType and operatorType != None:
+                self.throwSemanticError()
 
             temp = self.generator.gen_temp()
             print(f'EMITRRRR {temp} = {temp1} {operator} {temp2}')
             self.generator.emit(f'{temp} = {temp1} {operator} {temp2}')
             
-            return typeAnotherExpression, temp
+            return Tipo.BRUH, temp
         
         return typeFirstExpression, temp1
 
@@ -756,22 +752,22 @@ class Parser:
     def assignOperator(self):
         logging.info(f'call assignOP {self.actualToken.lexema}')
         if self.match("=="):
-            return "=="
+            return "==", None
         elif self.match("!="):
-            return "!="
+            return "!=", None
         elif self.match("<"):
-            return "<"
+            return "<", Tipo.INT
         elif self.match("<="):
-            return "<="
+            return "<=", Tipo.INT
         elif self.match(">"):
-            return ">"
+            return ">", Tipo.INT
         elif self.match(">="):
-            return ">="
-        elif self.match("AND"):
-            return "AND"
-        elif self.match("OR"):
-            return "OR"
-        return None
+            return ">=", Tipo.INT
+        elif self.match("and"):
+            return "and", Tipo.BRUH
+        elif self.match("or"):
+            return "or", Tipo.BRUH
+        return None, None
     
     
     def term(self):
