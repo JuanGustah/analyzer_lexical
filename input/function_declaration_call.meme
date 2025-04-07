@@ -1,0 +1,9 @@
+int hora_do_show soma(int a, int b) {
+    receba a + b;
+}
+
+meme {
+    int result;
+    result = soma(10, 20);
+    amostradinho(result);
+}

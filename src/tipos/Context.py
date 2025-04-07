@@ -1,6 +1,7 @@
 from typing import List
-from tipos.SymbolTable import SymbolTable
-from tipos import Identifier, Nature
+
+from src.tipos import Identifier, Nature
+from src.tipos.SymbolTable import SymbolTable
 
 class Context:
     def __init__(self, identifier: str, parent=None):
