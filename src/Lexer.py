@@ -245,6 +245,7 @@ class Lexer:
         
     def add_token(self, token_type, lexema=None, value=None):
         # verificar se o token é identificador sim = salvar na tabela de simbolos
+        insertedRegCode = None
         if token_type == 'id':
             register = Identifier(
                 self.line_number+self.head_position, 
@@ -256,25 +257,17 @@ class Lexer:
             
             inserted_reg = self.context.add_reg(register)
 
-            self.tokens.append(
-                Token(
-                    token_type, 
-                    lexema, 
-                    inserted_reg.cod, 
-                    self.line_number, 
-                    self.head_position
-                )
-            )
-            
+            insertedRegCode = inserted_reg.cod
+        
         self.tokens.append(
-                Token(
-                    token_type, 
-                    lexema, 
-                    None, 
-                    self.line_number, 
-                    self.head_position
-                )
+            Token(
+                token_type, 
+                lexema, 
+                insertedRegCode, 
+                self.line_number, 
+                self.head_position
             )
+        )
 
     def current_char(self):
         return self.line[self.head_position] if self.head_position < len(self.line) else None

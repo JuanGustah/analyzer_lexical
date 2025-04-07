@@ -1,3 +1,4 @@
 meme {
   int x = 2;
+  amostradinho(2);
 }
