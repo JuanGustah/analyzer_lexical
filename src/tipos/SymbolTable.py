@@ -1,7 +1,7 @@
 from typing import List
 from tabulate import tabulate
 
-from tipos import Identifier, Tipo, Token
+from src.tipos import Identifier, Tipo, Token
 
 class SymbolTable:
     def __init__(self):

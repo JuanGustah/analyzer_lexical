@@ -1,0 +1,8 @@
+meme {
+    int x = 5;
+    irineu_voce_sabe(x > 0) {
+        amostradinho(x);
+    } nem_eu {
+        amostradinho(-1);
+    }
+}

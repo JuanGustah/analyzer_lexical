@@ -1,5 +1,3 @@
-import logging
-
 class CodeGenerator:
     def __init__(self):
         self.temp_count = 0
