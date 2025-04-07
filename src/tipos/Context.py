@@ -6,6 +6,7 @@ from src.tipos.SymbolTable import SymbolTable
 class Context:
     def __init__(self, identifier: str, parent=None):
         self.identifier = identifier
+        self.alias = None
         self.symbol_table = SymbolTable()
         
         self.lexer_counter = 0
@@ -28,7 +29,11 @@ class Context:
         return None
 
     def add_reg(self, reg: Identifier):
-        return self.symbol_table.add(reg)
+        register = self.symbol_table.findByName(reg.nome)
+        if(register == None):
+            return self.symbol_table.add(reg)
+        else:
+            return register
         
     
     def lookup(self, id_name: str):

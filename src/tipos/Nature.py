@@ -2,5 +2,6 @@ from enum import Enum
 
 
 class Nature(Enum):
-    FUNC = 1
-    LOOP = 2
+    PROC = 1
+    FUNC = 2
+    LOOP = 3
