@@ -1,9 +1,8 @@
-int hora_do_show soma(int n1){
+void hora_do_show soma(bruh n1){
   amostradinho(2);
-  receba 2;
 }
 
 meme {
-  bruh x = real;
-  amostradinho(2);
+  int r = 2;
+  soma(r);
 }

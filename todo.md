@@ -3,3 +3,17 @@
 - implementar função
 
 - ao criar uma var, verificar se ela ja existe até o contexto global
+
+---
+void hora_do_show soma(int n1){
+  amostradinho(2);
+}
+
+meme {
+  int r = 2;
+  soma(real);
+}
+
+* Garantir que parametros de soma() estao de acordo com 
+* Colocar um novo atributo array para mapear cada parametros
+---

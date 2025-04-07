@@ -3,7 +3,7 @@ import re
 from typing import List
 from tabulate import tabulate
 
-from src.tipos import Identifier, Token, Context
+from tipos import Identifier, Token, Context
 
 # Constantes para identificação de padrões
 DIGIT = r'[0-9]'

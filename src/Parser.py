@@ -2,8 +2,8 @@ import logging
 from functools import wraps
 from typing import List
 
-from src.CodeGenerator import CodeGenerator
-from src.tipos import Context, Nature, Tipo, Token
+from CodeGenerator import CodeGenerator
+from tipos import Context, Nature, Tipo, Token
 
 logging.basicConfig(
         level=logging.DEBUG,
@@ -67,20 +67,6 @@ class Parser:
         else:
             self.actualToken = None
             logging.info(f'Sem tokens para leitura')
-    
-    @log_calls
-    def lookAhead(self, matchString):
-        if self.actualTokenPos + 1 < len(self.tokens):
-            tokenString = self.tokens[self.actualTokenPos+1].lexema
-
-            isEqual = tokenString == matchString
-
-            if(isEqual):
-                self.getNextToken()
-                return True
-            return False
-        else:
-            return False
     
     @log_calls
     def start(self):
@@ -193,6 +179,18 @@ class Parser:
 
         if(self.checkType()):
             self.declarationVariableStep()
+    
+    @log_calls
+    def callParameters(self):
+        logging.info(f'callParameters')
+        typeFirstExpression, temp = self.expression()
+
+        self.getNextToken()
+        
+        if(self.match(',')):
+            self.getNextToken()
+            self.declarationVariableStep()
+        
     
     # ==================================== DECLARAÇÕES =============================================== #
     @log_calls
@@ -362,6 +360,8 @@ class Parser:
         #adicionar validação para return/receba e chamada de função
         typeStatement = self.statement()
 
+        print('BESTEIRAAa')
+        
         if self.hasStatement():
             self.statements()
 
@@ -412,9 +412,9 @@ class Parser:
             return self.readStatement()
         elif(self.match("receba")):
             return self.returnStatement()
-        # elif(self.match("id")):
-        #     #falta finalizar a parte de chamada de função
-        #     return self.callOrAssignStatement()
+        elif(self.match("id")):
+            #falta finalizar a parte de chamada de função
+            return self.callOrAssignStatement()
 
         self.throwSyntaxError()
 
@@ -607,33 +607,56 @@ class Parser:
     
     @log_calls
     def callOrAssignStatement(self):
-        logging.info(f'callOrAssignStatement')
+        """
+            <call-or-assign-statement> ::= 
+            <identifier> ( <assign-statement> | <call-function-statement> )
+            id = 2;
+            id(2);
+        """
         if(self.identifier()):
-            self.checkIfIsDeclared(self.actualToken)
-
-            idType = self.getTypeId(self.actualToken)
-
+            
+            identificador_tipo = self.current_context.symbol_table.lookup(self.actualToken.lexema).tipo
+            identificador_token = self.actualToken
+            identificador_nome = self.actualToken.lexema
+            
             self.getNextToken()  
-
+            print(f'ATUALLLLLLLLLLLLL {self.actualToken}')
+            
             if(self.match("=")):
-                typeAssignment = self.assignStatement()
+                self.checkIfIsDeclared(identificador_token)
+                typeAssignment, temp = self.assignStatement()
+                print(f"TIPOOOOOOOOOOOO: {typeAssignment}")
+                print(f"TIPOOOOOOOOOOOO: {identificador_tipo}")
 
                 #validar se id tem tipo igual ao da expressão
-                if(idType != typeAssignment):
+                if(identificador_tipo != typeAssignment):
                     self.throwSemanticError()
 
                 if(self.match(";")):
                     self.getNextToken()
 
-                return idType
-            elif(self.callFunctionStatement()):
-                return True
-        
+                return identificador_tipo
+            
+            elif(self.match('(')):
+                self.identifier()
+                
+                result = self.global_context.lookup(identificador_nome)
+                if result:
+                    self.callFunctionStatement()
+
+                else:
+                    self.throwSemanticError()
+                    
+                if(self.match(";")):
+                    self.getNextToken()
+                
+                    return True 
         self.throwSyntaxError()
 
     @log_calls
     def assignStatement(self):
         logging.info(f'assignStatement')
+        
         if(self.match("=")):
             self.getNextToken()
 
@@ -651,16 +674,18 @@ class Parser:
         if(self.match("(")):
             self.getNextToken()
 
-            if(self.identifier()):
-                self.getNextToken()
+            self.callParameters()
+            
+            # if(self.identifier()):
+            #     self.getNextToken()
 
-                while self.match(','):
-                    self.getNextToken()
-                    self.identifier()
-                    self.getNextToken()
+            #     while self.match(','):
+            #         self.getNextToken()
+            #         self.identifier()
+            #         self.getNextToken()
 
-                if(self.match(")")):
-                    return True
+            if(self.match(")")):
+                return True
         return False
 
     # ==================================== EXPRESSÕES =============================================== #
@@ -850,8 +875,10 @@ class Parser:
 
     @log_calls
     def checkIfIsDeclared(self, token: Token):
-        registro = self.current_context.symbol_table.findByCod(token.indice_tabela)
-
+        #TODO: Verificar nos contextos parent.
+        #registro = self.current_context.symbol_table.findByCod(token.indice_tabela)
+        registro = self.current_context.lookup(token.lexema)
+        print(f'REGISTROOOOO ACHADOOOO {registro}')
         if not registro:
             self.throwSemanticError()
 
