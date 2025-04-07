@@ -2,9 +2,8 @@ import logging
 from functools import wraps
 from typing import List
 
-from CodeGenerator import CodeGenerator
-from tipos import Context
-from tipos import Nature, Tipo, Token
+from src.CodeGenerator import CodeGenerator
+from src.tipos import Context, Nature, Tipo, Token
 
 logging.basicConfig(
         level=logging.DEBUG,

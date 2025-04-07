@@ -1,0 +1,8 @@
+meme {
+    int x = 5;
+    here_we_go_again(x > 0) {
+        amostradinho(x);
+        x = x - 1;
+        papapare;
+    }
+}
