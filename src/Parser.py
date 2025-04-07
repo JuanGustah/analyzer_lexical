@@ -16,8 +16,6 @@ class ContextMetadata:
         self.nature = nature
         self.alias = alias
 
-
-
 class Parser:
     def __init__(self, tokens, context):
         self.tokens:            List[Token] = tokens
@@ -212,7 +210,7 @@ class Parser:
             self.getNextToken()  
 
             if self.identifier(declarationVariableType):
-                #self.checkIdDuplicated(self.actualToken)
+                self.checkIdDuplicated(self.actualToken)
                 idToken = self.actualToken
                 self.getNextToken()  
 
@@ -352,8 +350,6 @@ class Parser:
     def statements(self):
         #adicionar validação para return/receba e chamada de função
         typeStatement = self.statement()
-
-        print('BESTEIRAAa')
         
         if self.hasStatement():
             self.statements()
@@ -439,8 +435,8 @@ class Parser:
                 expressionType, temp = self.expression()
                 # if(self.expression()):
 
-                # irineu_voce_sabe (x == 2) - comparar inteiros
-                # if(expressionType != Tipo.BRUH):
+                # irineu_voce_sabe (x == 2) - comparar inteiros - expression pode ter INT x é
+                #if(expressionType != Tipo.BRUH):
                 #     self.throwSemanticError()
 
                 if(self.match(")")):
@@ -448,29 +444,29 @@ class Parser:
                     
                     label_else = self.generator.gen_label()
                     label_end = self.generator.gen_label()
-                    print(f"CIMAAAAAAAA if {temp} goto {label_else}")
+    
                     #self.generator.emit(f"if {temp} == 0 goto {label_else}")
                     self.generator.emit(f"if {temp} goto {label_else}")
                     
                     self.next_context = "irineu_voce_sabe"
                     self.body()
                     
+                    
                     self.generator.emit(f"goto {label_end}")
                     self.generator.emit(f'{label_else}:')
-                    
-                    # if():
+
                     self.getNextToken()
 
-                    # if(self.lookAhead("nem_eu")):
                     if(self.match("nem_eu")):
                         self.getNextToken()
 
                         self.next_context = "nem_eu"
+                        
                         self.body()
+                        self.generator.emit(f'{label_end}:')
                         
-                        self.generator.emit(f'{label_end}')
-                        
-                        # if():
+                        #pode quebrar
+                        self.getNextToken()
                         return None
 
                     return None
@@ -612,33 +608,48 @@ class Parser:
         """
         if(self.identifier()):
             
-            identificador_tipo = self.current_context.symbol_table.lookup(self.actualToken.lexema).tipo
+            #
             identificador_token = self.actualToken
             identificador_nome = self.actualToken.lexema
-            token = self.actualToken
+            #token = self.actualToken
             
+            # verificar se já existe 
+            registro = self.current_context.lookup(identificador_token)
+            if not registro:
+                self.throwSemanticError()
+                
+            identificador_tipo = registro.tipo
             self.getNextToken()  
-            print(f'ATUALLLLLLLLLLLLL {self.actualToken}')
+
             
             if(self.match("=")):
                 self.checkIfIsDeclared(identificador_token)
                 typeAssignment, temp = self.assignStatement()
-                print(f"TIPOOOOOOOOOOOO: {typeAssignment}")
-                print(f"TIPOOOOOOOOOOOO: {identificador_tipo}")
 
                 #validar se id tem tipo igual ao da expressão
                 if(identificador_tipo != typeAssignment):
                     self.throwSemanticError()
-
+                    
+                self.generator.emit(f"{identificador_nome} = {temp}")
+                
                 if(self.match(";")):
                     self.getNextToken()
-
-                return identificador_tipo
+                    return identificador_tipo, None
+                else:
+                    self.throwSyntaxError()
+                    
+                #return identificador_tipo
             
+            #TODO: INCOMPLETO
             elif(self.match('(')):
+                func_registro = self.global_context.symbol_table.lookup(identificador_nome)
+                
+                if not func_registro or func_registro.nature != Nature.FUNC:
+                    self.throwSemanticError()
+                    
                 self.identifier()
                 
-                result = self.global_context.lookup(token)
+                result = self.global_context.lookup(identificador_token)
                 if result:
                     self.callFunctionStatement()
 
@@ -710,7 +721,7 @@ class Parser:
             #     self.throwSemanticError()
 
             temp = self.generator.gen_temp()
-            print(f'EMITRRRR {temp} = {temp1} {operator} {temp2}')
+            # 
             self.generator.emit(f'{temp} = {temp1} {operator} {temp2}')
             
             return typeAnotherExpression, temp
@@ -735,6 +746,7 @@ class Parser:
         if typeUnaryOperator:
             new_temp = self.generator.gen_temp()
             self.generator.emit(f"{new_temp} = {unaryOperator} {temp}")
+            return typeTerm, new_temp
         
         return typeTerm, temp
 
@@ -819,9 +831,8 @@ class Parser:
 
             return Tipo.INT, temp
         elif(self.identifier()):
-            #TODO: Existe em parentes acima, já foi declarado
             token = self.actualToken
-            #self.checkIfIsDeclared(self.actualToken)
+            self.checkIfIsDeclared(self.actualToken)
             
             self.getNextToken()
             if token.tipo == 'id':
@@ -877,9 +888,8 @@ class Parser:
         
         return False
     
-    #############################################################################################
     def handleDuplicates(self):
-        #TODO: se for funcao, erro
+        #TODO: INCOMPLETO se for funcao, erro
         
         
         # se for var, copiar para contexto interno.
@@ -896,12 +906,11 @@ class Parser:
             return registro.tipo 
 
 
-    
     def checkIdDuplicated(self, token: Token):
 
         registro = self.current_context.symbol_table.lookup(token.lexema)
 
-        if not registro:
+        if registro and registro.tipo != None and registro.cod != token.indice_tabela:
             self.throwSemanticError()
 
     
@@ -909,6 +918,7 @@ class Parser:
         #TODO: Verificar nos contextos parent.
         registro = self.current_context.lookup(token)
         
+        # POIS ESTA TENTANTO USAR UM TOKEN SEM TER DECLARADO.
         if not registro:
             self.throwSemanticError()
 

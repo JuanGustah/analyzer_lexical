@@ -1,10 +1,5 @@
 meme {
-    int x = 1;
-    irineu_voce_sabe (x > 0) {
-        amostradinho(x);
-    } nem_eu {
-        amostradinho(-1);
-    }
-    
-    amostradinho(x+1);
+    int x; int j = 1;
+    x = j;
+    amostradinho(x);
 }

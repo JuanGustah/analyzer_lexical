@@ -14,12 +14,6 @@ meme {
   soma(real);
 }
 
-* Garantir que parametros de soma() estao de acordo com 
-* Colocar um novo atributo array para mapear cada parametros
+* Garantir que parametros de soma() estao de acordo com, 
 ---
 
-NOTAS 07/04/2025
-
--Não usar irineu_voce_sabe sem nem_eu - pois quebra as traduções (mudar regras)
--if(expressionType != Tipo.BRUH): validações quebram para casos onde comparar numericos here_we_go_again (x > 0) [x > 0 = Tipo.BRUH]
-- int result = soma(15, 20);
