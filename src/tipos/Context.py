@@ -5,6 +5,7 @@ from tipos import Identifier, Nature
 class Context:
     def __init__(self, identifier: str, parent=None):
         self.identifier = identifier
+        self.alias = None
         self.symbol_table = SymbolTable()
         
         self.lexer_counter = 0
