@@ -892,7 +892,8 @@ class Parser:
     def getIdentifier(self, token: Token):
         # DEVE PEGAR O TIPO DE ONDE ELE É DECLARADO/PRIMEIRA VEZ QUE APARECE
         registro = self.current_context.symbol_table.lookup(token.lexema)
-        return registro.tipo
+        if registro:
+            return registro.tipo 
 
 
     

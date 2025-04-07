@@ -4,13 +4,13 @@ from Parser import Parser
 if __name__ == "__main__":
     lexer = Lexer("input/input.meme")
     lexer.start()
-    lexer.display_tokens()
+    #lexer.display_tokens()
     #lexer.context.list_symbols()
     #lexer.context.context_hierarchy(lexer.context)
     #print('Leitura no Parser')
     parser = Parser(lexer.tokens, lexer.context)
     
     parser.start()
-    #parser.current_context.list_symbols()
+    parser.global_context.list_symbols()
 
     #lexer.display_symbol_table()

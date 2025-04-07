@@ -31,7 +31,10 @@ class SymbolTable:
     def setReg(self, reg: Identifier) -> bool:
         for idx, i in enumerate(self.table):
             if reg.nome == i.nome:
-                self.table[idx] = reg
+                self.table[idx].coluna = reg.coluna
+                self.table[idx].linha = reg.linha
+                self.table[idx].nome = reg.nome
+                self.table[idx].tipo = reg.tipo
                 return True
             
         return False

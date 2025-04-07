@@ -30,29 +30,31 @@ class Context:
         return None
 
     def add_reg(self, reg: Identifier) -> Optional[Identifier]:
-        register = self.symbol_table.lookup(reg.nome)
-        
-        if(register == None):
+        if(reg != None):
             return self.symbol_table.add(reg)
         else:
-            return register
+            return reg
     
     def setType(self, token: Token, newType: Tipo) -> bool:
-        register = self.symbol_table.findByCod(token.indice_tabela)
+        register = self.symbol_table.lookup(token.lexema)
         
         if(register == None):
             return False
         
-        self.symbol_table.setReg(register)
+        register.tipo = newType
 
     def lookup(self, token: Token) -> Optional[Identifier]:
+        if not token:
+            return None
+        
         registro = self.symbol_table.lookup(token.lexema)
         
-        if registro:
+        # não é o mesmo token, ou seja, foi criado antes
+        if registro and registro.cod != token.indice_tabela:
             return registro
 
         if self.parent:
-            return self.parent.lookup(token.lexema)  
+            return self.parent.lookup(token)  
         
         return None
 
