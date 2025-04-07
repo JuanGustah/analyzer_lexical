@@ -21,6 +21,13 @@ class SymbolTable:
             
         return None
     
+    def findByName(self, name):
+        for i in self.table:
+            if name == i.nome:
+                return i
+            
+        return None
+    
     def lookup(self, nome: str):
         for i in self.table:
             if nome == i.nome:
@@ -31,7 +38,7 @@ class SymbolTable:
     
     def setType(self, token: Token, newType: Tipo):
         for i in self.table:
-            if token.indice_tabela == i.cod:
+            if token.lexema == i.nome:
                 i.tipo = newType
                 return True
             

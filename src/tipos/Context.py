@@ -27,7 +27,11 @@ class Context:
         return None
 
     def add_reg(self, reg: Identifier):
-        return self.symbol_table.add(reg)
+        register = self.symbol_table.findByName(reg.nome)
+        if(register == None):
+            return self.symbol_table.add(reg)
+        else:
+            return register
         
     
     def lookup(self, id_name: str):

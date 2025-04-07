@@ -221,13 +221,14 @@ class Parser:
 
                 if self.match("="):
                     # if self.assignStatement(): 
+
                     typeAssignment, temp = self.assignStatement()
 
                     if(typeAssignment != declarationVariableType):
                         self.throwSemanticError()
 
                     self.generator.emit(f"{idToken.lexema} = {temp}")
-                    #self.setIdType(idToken, typeAssignment)
+                    self.setIdType(idToken, typeAssignment)
 
                     if self.match(";"):
                         self.getNextToken()  
@@ -235,7 +236,15 @@ class Parser:
                     return None
 
                 if self.match(";"):
-                    self.setIdType(id, declarationVariableType)
+                    self.setIdType(idToken, declarationVariableType)
+
+                    if(declarationVariableType == Tipo.BRUH):
+                        self.generator.emit(f"{idToken.lexema} = barca")
+                    elif(declarationVariableType == Tipo.INT):
+                        self.generator.emit(f"{idToken.lexema} = 0")
+
+
+                    self.getNextToken()  
                     return None
             # return False
         # return False
@@ -658,7 +667,7 @@ class Parser:
         logging.info(f'simpleExpression')
         typeUnaryOperator, unaryOperator = self.unaryOperator()
         
-        print(f"unaryOperator {unaryOperator}")
+        logging.info(f"unaryOperator is {unaryOperator}")
         typeTerm, temp = self.term()
 
         # if(self.term()):
@@ -711,7 +720,7 @@ class Parser:
     def term(self):
         logging.info(f'term {self.actualToken.lexema}')
         typeFactor, temp1 = self.factor()
-                
+
         if(self.match('+') or self.match('-') or self.match('*') or self.match('/')):
             operator = self.actualToken.lexema
             self.getNextToken()
@@ -751,8 +760,7 @@ class Parser:
             token = self.actualToken
             #self.checkIfIsDeclared(self.actualToken)
             
-            logging.info(f'factor {self.registro}')
-            
+            self.current_context.list_symbols()
             self.getNextToken()
 
             return self.getIdentifier(token), token.lexema
@@ -820,6 +828,9 @@ class Parser:
 
         if not registro:
             self.throwSemanticError()
+
+    def setIdType(self, idToken, newType):
+        self.current_context.symbol_table.setType(idToken, newType)
 
     def throwSyntaxError(self):
         logging.error(f"SyntaxError → {self.actualToken}")
