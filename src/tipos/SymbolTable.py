@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from tabulate import tabulate
 
 from tipos import Identifier, Tipo, Token
@@ -7,39 +7,31 @@ class SymbolTable:
     def __init__(self):
         self.table: List[Identifier] = []
 
-    def add(self, registro: Identifier):
+    def add(self, registro: Identifier) -> Optional[Identifier]:
         if registro:
             self.table.append(registro)
             return registro
         
         return None
     
-    def findByCod(self, cod: int):
+    def findByCod(self, cod: int) -> Optional[Identifier]:
         for i in self.table:
             if cod == i.cod:
                 return i
             
         return None
     
-    def findByName(self, name):
-        for i in self.table:
-            if name == i.nome:
-                return i
-            
-        return None
-    
-    def lookup(self, nome: str):
+    def lookup(self, nome: str) -> Optional[Identifier]:
         for i in self.table:
             if nome == i.nome:
                 return i
             
         return None
 
-    
-    def setType(self, token: Token, newType: Tipo):
-        for i in self.table:
-            if token.lexema == i.nome:
-                i.tipo = newType
+    def setReg(self, reg: Identifier) -> bool:
+        for idx, i in enumerate(self.table):
+            if reg.nome == i.nome:
+                self.table[idx] = reg
                 return True
             
         return False

@@ -6,8 +6,8 @@ from CodeGenerator import CodeGenerator
 from tipos import Context, Nature, Tipo, Token
 
 logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s - CALL STACK - %(message)s',
+        level=logging.INFO,
+        format='%(asctime)s - [INFO] - %(message)s',
         handlers=[logging.StreamHandler()]
 )
 
@@ -15,6 +15,8 @@ class ContextMetadata:
     def __init__(self, nature, alias = None):
         self.nature = nature
         self.alias = alias
+
+
 
 class Parser:
     def __init__(self, tokens, context):
@@ -25,19 +27,8 @@ class Parser:
         self.actualTokenPos:    int = -1
         self.actualToken:       Token = None
         self.generator:         CodeGenerator = CodeGenerator()
+        self.logs:              bool = False
         
-
-    def log_calls(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # logging.debug(f">>> Entrando em {func.__name__}")
-            result = func(*args, **kwargs)
-            # logging.debug(f"<<< Saindo de {func.__name__}")
-            return result
-        return wrapper
-    
- 
-    @log_calls
     def match(self, match):
         if self.actualToken is None:
             return False
@@ -57,7 +48,7 @@ class Parser:
             return True
         return False
     
-    @log_calls
+    
     def getNextToken(self): 
         if self.actualTokenPos + 1 < len(self.tokens):
             self.actualTokenPos += 1
@@ -68,7 +59,7 @@ class Parser:
             self.actualToken = None
             logging.info(f'Sem tokens para leitura')
     
-    @log_calls
+    
     def start(self):
         try:
 
@@ -86,7 +77,7 @@ class Parser:
 
     # ================= Descrição BNF da Linguagem Simplificada ===================================== #
     
-    @log_calls
+    
     def program(self):
         self.getNextToken()
         
@@ -105,7 +96,7 @@ class Parser:
 
         return True
 
-    @log_calls
+    
     def mainBody(self):
         logging.info(f'mainBody')
         if(self.match("meme")):
@@ -117,7 +108,7 @@ class Parser:
         
         self.throwSyntaxError()
     
-    @log_calls
+    
     def body(self, metadata: ContextMetadata = None):
         logging.info(f'Body')
         if(self.match("{")):
@@ -157,7 +148,7 @@ class Parser:
             #     return False
         self.throwSyntaxError()
 
-    @log_calls
+    
     def subRoutineStep(self):
         logging.info(f'subRoutineStep')      
         if(self.match('void')):
@@ -172,7 +163,7 @@ class Parser:
         
         # return False
     
-    @log_calls
+    
     def declarationVariableStep(self):
         logging.info(f'declarationVariableStep')
         self.declarationVariable()
@@ -180,7 +171,7 @@ class Parser:
         if(self.checkType()):
             self.declarationVariableStep()
     
-    @log_calls
+    
     def callParameters(self):
         logging.info(f'callParameters')
         typeFirstExpression, temp = self.expression()
@@ -193,17 +184,16 @@ class Parser:
         
     
     # ==================================== DECLARAÇÕES =============================================== #
-    @log_calls
     def checkType(self):
         logging.info(f'tipo de token: {self.actualToken.lexema} == (int/bruh)')
         if(self.match("int")):
-            return True
+            return Tipo.INT
         elif(self.match("bruh")):
-            return True
+            return Tipo.BRUH
         
         return False
     
-    @log_calls
+    
     def type(self):
         logging.info(f'verificando tipo de : {self.actualToken.lexema} == (int/bruh)')
         if(self.match("int")):
@@ -213,14 +203,15 @@ class Parser:
         
         self.throwSemanticError()
     
-    @log_calls
+    
     def declarationVariable(self):
         logging.info(f'declarationVariable')
-        if self.checkType(): 
-            declarationVariableType = self.type()
+        declarationVariableType = self.checkType()
+        if declarationVariableType: 
+            
             self.getNextToken()  
 
-            if self.identifier():
+            if self.identifier(declarationVariableType):
                 #self.checkIdDuplicated(self.actualToken)
                 idToken = self.actualToken
                 self.getNextToken()  
@@ -234,7 +225,7 @@ class Parser:
                         self.throwSemanticError()
 
                     self.generator.emit(f"{idToken.lexema} = {temp}")
-                    self.setIdType(idToken, typeAssignment)
+                    #self.setIdType(idToken, typeAssignment)
 
                     if self.match(";"):
                         self.getNextToken()  
@@ -245,7 +236,7 @@ class Parser:
                     self.setIdType(idToken, declarationVariableType)
 
                     if(declarationVariableType == Tipo.BRUH):
-                        self.generator.emit(f"{idToken.lexema} = barca")
+                        self.generator.emit(f"{idToken.lexema} = barca") #default value
                     elif(declarationVariableType == Tipo.INT):
                         self.generator.emit(f"{idToken.lexema} = 0")
 
@@ -255,13 +246,14 @@ class Parser:
             # return False
         # return False
     
-    @log_calls
+    
     def declarationParameters(self):
         logging.info(f'declarationParameters')
-        if(self.checkType()):
+        tipo_variavel = self.checkType()
+        if(tipo_variavel):
             self.getNextToken()
             
-            if(self.identifier()):
+            if(self.identifier(tipo_variavel)):
                 self.getNextToken()
             else:
                 self.throwSyntaxError()
@@ -275,14 +267,15 @@ class Parser:
             else:
                 return None
     
-    @log_calls
+    
     def declarationFunction(self):
         logging.info(f'declarationFunction')
-        if self.checkType():  
+        tipo = self.checkType()
+        if tipo:  
             self.getNextToken()
             if self.match('hora_do_show'):
                 self.getNextToken()
-                if self.identifier():
+                if self.identifier(tipo):
                     funcName = self.actualToken.lexema
 
                     #adicionar tipo de retorno da tabela de simbolos do id da função (global)
@@ -307,7 +300,7 @@ class Parser:
                             
         self.throwSyntaxError()
 
-    @log_calls
+    
     def declarationProcedure(self):
         logging.info(f'declarationProcedure')
         if self.match("void"):
@@ -335,7 +328,7 @@ class Parser:
     
     # ==================================== COMANDOS =============================================== #
     
-    # @log_calls
+    # 
     #def statements(self):
     #     if(self.statement()):
     #         hasStatementsLeft = True
@@ -355,7 +348,7 @@ class Parser:
     #         return True
     #     return False
 
-    @log_calls
+    
     def statements(self):
         #adicionar validação para return/receba e chamada de função
         typeStatement = self.statement()
@@ -365,7 +358,7 @@ class Parser:
         if self.hasStatement():
             self.statements()
 
-    @log_calls
+    
     def hasStatement(self):
         if(self.match("irineu_voce_sabe")):
             return True
@@ -398,7 +391,7 @@ class Parser:
             return True
         return False
     
-    @log_calls
+    
     def statement(self):
         if(self.match("papapare") or self.match("ate_outro_dia")):
             return self.jumpStopStatement()
@@ -434,7 +427,7 @@ class Parser:
         #     return True
         # return False
     
-    @log_calls
+    
     def conditionStatement(self):
         logging.info(f'conditionStatement')
         if(self.match("irineu_voce_sabe")):
@@ -446,15 +439,18 @@ class Parser:
                 expressionType, temp = self.expression()
                 # if(self.expression()):
 
-                if(expressionType != Tipo.BRUH):
-                    self.throwSemanticError()
+                # irineu_voce_sabe (x == 2) - comparar inteiros
+                # if(expressionType != Tipo.BRUH):
+                #     self.throwSemanticError()
 
                 if(self.match(")")):
                     self.getNextToken()
                     
                     label_else = self.generator.gen_label()
                     label_end = self.generator.gen_label()
-                    self.generator.emit(f"if {temp} == 0 goto {label_else}")
+                    print(f"CIMAAAAAAAA if {temp} goto {label_else}")
+                    #self.generator.emit(f"if {temp} == 0 goto {label_else}")
+                    self.generator.emit(f"if {temp} goto {label_else}")
                     
                     self.next_context = "irineu_voce_sabe"
                     self.body()
@@ -480,7 +476,7 @@ class Parser:
                     return None
         self.throwSyntaxError()
     
-    @log_calls
+    
     def loopStatement(self):
         logging.info(f'loopStatement')
         if(self.match("here_we_go_again")):
@@ -495,13 +491,14 @@ class Parser:
                 self.getNextToken()
                 
                 expressionType, temp = self.expression()
-
-                if(expressionType != Tipo.BRUH):
-                    self.throwSemanticError()
+                # To testando here_we_go_again (x > 0) isso eé bruh 
+                # if(expressionType != Tipo.BRUH):
+                #     self.throwSemanticError()
 
                 if(self.match(")")):
                     
-                    self.generator.emit(f'if {temp} == 0 goto {label_end}')
+                    #self.generator.emit(f'if {temp} == 0 goto {label_end}')
+                    self.generator.emit(f'if {temp} goto {label_end}')
                     
                     self.getNextToken()
 
@@ -517,7 +514,7 @@ class Parser:
                         
         self.throwSyntaxError()
     
-    @log_calls
+    
     def jumpStopStatement(self):
         logging.info(f'jumpStopStatement')
         if(self.match("papapare")):
@@ -535,7 +532,7 @@ class Parser:
         
         self.throwSyntaxError()
     
-    @log_calls
+    
     def printStatement(self):
         logging.info(f'printStatement')
         if(self.match("amostradinho")):
@@ -556,7 +553,7 @@ class Parser:
                         return None
         self.throwSyntaxError()
     
-    @log_calls
+    
     def readStatement(self):
         logging.info(f'readStatement')
         if(self.match("casca_de_bala")):
@@ -582,7 +579,7 @@ class Parser:
                         
         self.throwSyntaxError()
     
-    @log_calls
+    
     def returnStatement(self):
         logging.info(f'returnStatement')
         if(self.match("receba")):
@@ -605,7 +602,7 @@ class Parser:
                 
         self.throwSyntaxError()
     
-    @log_calls
+    
     def callOrAssignStatement(self):
         """
             <call-or-assign-statement> ::= 
@@ -618,6 +615,7 @@ class Parser:
             identificador_tipo = self.current_context.symbol_table.lookup(self.actualToken.lexema).tipo
             identificador_token = self.actualToken
             identificador_nome = self.actualToken.lexema
+            token = self.actualToken
             
             self.getNextToken()  
             print(f'ATUALLLLLLLLLLLLL {self.actualToken}')
@@ -640,7 +638,7 @@ class Parser:
             elif(self.match('(')):
                 self.identifier()
                 
-                result = self.global_context.lookup(identificador_nome)
+                result = self.global_context.lookup(token)
                 if result:
                     self.callFunctionStatement()
 
@@ -653,22 +651,23 @@ class Parser:
                     return True 
         self.throwSyntaxError()
 
-    @log_calls
+    
     def assignStatement(self):
         logging.info(f'assignStatement')
-        
+        # teste: int result |= a + b * c;
+        # erro com a = 1;
         if(self.match("=")):
-            self.getNextToken()
+            self.getNextToken() # a
 
-            typeExpression, temp = self.expression()
-
+            typeExpression, temp = self.expression() 
+            
             return typeExpression, temp
             # if(self.expression()):
             #     return True
         # return False
         self.throwSyntaxError()
     
-    @log_calls
+    
     def callFunctionStatement(self):
         logging.info(f'callFunctionStatement')
         if(self.match("(")):
@@ -690,40 +689,46 @@ class Parser:
 
     # ==================================== EXPRESSÕES =============================================== #
     
-    @log_calls
+    
     def expression(self):
         logging.info(f'expression')
+
         # if(self.simpleExpression()):
         typeFirstExpression, temp1 = self.simpleExpression()
         operator = self.assignOperator()
+        #verificar a frente se tem  + - * /
         if operator:
-            if(typeFirstExpression == Tipo.INT):
-                self.throwSemanticError()
+            #X é inteiro entao throw? --> here_we_go_again (x > 0) x tem que ser inteiro aqui
+            # if(typeFirstExpression == Tipo.INT):
+            #     self.throwSemanticError()
 
             self.getNextToken()
                 
             typeAnotherExpression, temp2 = self.simpleExpression()
-
-            if(typeFirstExpression == Tipo.INT):
-                self.throwSemanticError()
+            # here_we_go_again (x > 0) 
+            # if(typeFirstExpression == Tipo.INT):
+            #     self.throwSemanticError()
 
             temp = self.generator.gen_temp()
+            print(f'EMITRRRR {temp} = {temp1} {operator} {temp2}')
             self.generator.emit(f'{temp} = {temp1} {operator} {temp2}')
             
             return typeAnotherExpression, temp
         
         return typeFirstExpression, temp1
 
-    @log_calls
+    
     def simpleExpression(self):
         logging.info(f'simpleExpression')
         typeUnaryOperator, unaryOperator = self.unaryOperator()
         
         logging.info(f"unaryOperator is {unaryOperator}")
         typeTerm, temp = self.term()
-
-        # if(self.term()):
+        #se ativar quebra na declaracao de var
+        # deixar desativado quebra em a + b * c;
+        # if(self.term()): 
         #     return True
+        
         if(typeUnaryOperator != None and typeUnaryOperator != typeTerm):
             self.throwSemanticError()
         
@@ -733,7 +738,7 @@ class Parser:
         
         return typeTerm, temp
 
-    @log_calls
+    
     def unaryOperator(self):
         logging.info(f'unaryOperator')
         if self.match("+"):
@@ -747,9 +752,9 @@ class Parser:
             return Tipo.BRUH, "!"
         return None, None
     
-    @log_calls
+    
     def assignOperator(self):
-        logging.info(f'assignOperator {self.actualToken.lexema}')
+        logging.info(f'call assignOP {self.actualToken.lexema}')
         if self.match("=="):
             return "=="
         elif self.match("!="):
@@ -768,7 +773,7 @@ class Parser:
             return "OR"
         return None
     
-    @log_calls
+    
     def term(self):
         logging.info(f'term {self.actualToken.lexema}')
         typeFactor, temp1 = self.factor()
@@ -778,12 +783,18 @@ class Parser:
             self.getNextToken()
             typeTerm, temp2 = self.term()
             
-            if(typeTerm == Tipo.BRUH or typeFactor == Tipo.BRUH):
-                self.throwSemanticError()
+            # se for numeros de identificadores
+            # a + b * c;
+            # if(typeTerm == Tipo.BRUH or typeFactor == Tipo.BRUH):
+            #     self.throwSemanticError()
                 
             temp = self.generator.gen_temp()
             self.generator.emit(f"{temp} = {temp1} {operator} {temp2}")
             temp1 = temp
+            
+        #verificar se é chamado de funcao
+
+            
         return typeFactor, temp1
         # if(self.factor()):
         #     while self.match('+') or self.match('-') or self.match('*') or self.match('/'):
@@ -793,7 +804,7 @@ class Parser:
         #     return True
         # return False
     
-    @log_calls
+    
     def factor(self):
         logging.info(f'factor {self.actualToken.lexema}')
         if(self.match("real") or self.match("barca")):
@@ -813,9 +824,12 @@ class Parser:
             #self.checkIfIsDeclared(self.actualToken)
             
             self.getNextToken()
-
-            return self.getIdentifier(token), token.lexema
-
+            if token.tipo == 'id':
+                return self.getIdentifier(token), token.lexema
+            # int result = soma(a, b);
+            # nesse ponto estamos lendo o ( de soma
+            self.callParameters()
+            
             #remover para simplificar
             # if(self.callFunctionStatement()):
             #     self.getNextToken()
@@ -837,55 +851,72 @@ class Parser:
             #         return True
 
         # return False
-        self.throwSyntaxError()
+        #self.throwSyntaxError()
 
     # ==================================== NÚMEROS E IDENTIFICADORES =============================================== #
     
-    @log_calls
-    def identifier(self):
+    
+    
+    def identifier(self, tipo=None):
         logging.info(f"identificador do token: {self.actualToken.lexema} == id")
         if(self.match("id")):
+            
+            # verificar se existe e atribuir 
+            if not self.handleDuplicates():
+                self.current_context.setType(self.actualToken, tipo)
+                
             return True
         
         return False
     
-    @log_calls
+    
+    
     def number(self):
         if(self.match('number')):
             return True
         
         return False
     
-    @log_calls
+    #############################################################################################
+    def handleDuplicates(self):
+        #TODO: se for funcao, erro
+        
+        
+        # se for var, copiar para contexto interno.
+        result = self.current_context.lookup(self.actualToken)
+        if result:
+            self.current_context.symbol_table.setReg(result)
+            return True
+        return False
+    
     def getIdentifier(self, token: Token):
-        registro = self.current_context.symbol_table.findByCod(token.indice_tabela)
+        # DEVE PEGAR O TIPO DE ONDE ELE É DECLARADO/PRIMEIRA VEZ QUE APARECE
+        registro = self.current_context.symbol_table.lookup(token.lexema)
         return registro.tipo
 
-    @log_calls
-    def setTypeIdentifier(self, token, newType):
-        self.current_context.symbol_table.setType(token, newType)
 
-    @log_calls
+    
     def checkIdDuplicated(self, token: Token):
 
-        registro = self.current_context.symbol_table.findByCod(token.indice_tabela)
+        registro = self.current_context.symbol_table.lookup(token.lexema)
 
         if not registro:
             self.throwSemanticError()
 
-    @log_calls
+    
     def checkIfIsDeclared(self, token: Token):
         #TODO: Verificar nos contextos parent.
-        #registro = self.current_context.symbol_table.findByCod(token.indice_tabela)
-        registro = self.current_context.lookup(token.lexema)
-        print(f'REGISTROOOOO ACHADOOOO {registro}')
+        registro = self.current_context.lookup(token)
+        
         if not registro:
             self.throwSemanticError()
 
     def setIdType(self, idToken, newType, context = None):
-        if(context):
-            context.symbol_table.setType(idToken, newType)
-        self.current_context.symbol_table.setType(idToken, newType)
+        
+        # if(context):
+        #     context.symbol_table.setType(idToken, newType)
+            
+        self.current_context.setType(idToken, newType)
 
     def throwSyntaxError(self):
         logging.error(f"SyntaxError → {self.actualToken}")

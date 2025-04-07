@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Optional
 
-from tipos import Identifier, Nature
+from tipos import Tipo, Token
+from tipos import Identifier, Nature, Context
 from tipos.SymbolTable import SymbolTable
 
 class Context:
@@ -16,34 +17,42 @@ class Context:
         self.parent:        Context = parent 
         self.nature:        Nature = None
 
-    def add_subcontext(self, subcontext_name: str):
+    def add_subcontext(self, subcontext_name: str) -> Optional[Context]:
         new_subcontext = Context(subcontext_name, parent=self)
         self.lexer_counter += 1
         self.subcontexts.append(new_subcontext)
         return new_subcontext
 
-    def get_subcontext(self, identifier: str):
+    def get_subcontext(self, identifier: str) -> Optional[Context]:
         for sub in self.subcontexts:
             if identifier in sub.identifier:
                 return sub
         return None
 
-    def add_reg(self, reg: Identifier):
-        register = self.symbol_table.findByName(reg.nome)
+    def add_reg(self, reg: Identifier) -> Optional[Identifier]:
+        register = self.symbol_table.lookup(reg.nome)
+        
         if(register == None):
             return self.symbol_table.add(reg)
         else:
             return register
-        
     
-    def lookup(self, id_name: str):
-        registro = self.symbol_table.lookup(id_name)
+    def setType(self, token: Token, newType: Tipo) -> bool:
+        register = self.symbol_table.findByCod(token.indice_tabela)
+        
+        if(register == None):
+            return False
+        
+        self.symbol_table.setReg(register)
+
+    def lookup(self, token: Token) -> Optional[Identifier]:
+        registro = self.symbol_table.lookup(token.lexema)
         
         if registro:
             return registro
 
         if self.parent:
-            return self.parent.lookup(id_name)  
+            return self.parent.lookup(token.lexema)  
         
         return None
 

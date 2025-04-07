@@ -1,8 +1,6 @@
-void hora_do_show soma(bruh n1){
-  amostradinho(2);
-}
-
 meme {
-  int r = 2;
-  soma(r);
+    int x = 10;
+    here_we_go_again (x > 0) {
+        x = x - 1;
+    }
 }
