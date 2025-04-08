@@ -1,7 +1,12 @@
 meme {
-  int x;
   int x = 10;
   
+  irineu_voce_sabe(x > 0){
+    int x = 15;
+    int x = 10;
+    amostradinho(x);
+  } 
+
   #necessario#
   amostradinho(1);
 }

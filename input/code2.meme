@@ -8,16 +8,7 @@ meme {
     irineu_voce_sabe (x > 0) {
         amostradinho(x);
         
-    } 
-    nem_eu {
+    } nem_eu {
         amostradinho(-1);
     }
-    irineu_voce_sabe (x > 0) {
-        amostradinho(x);
-        
-    } 
-    nem_eu {
-        amostradinho(-1);
-    }
-
 }
