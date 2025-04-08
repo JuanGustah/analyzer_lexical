@@ -1,3 +1,5 @@
+from typing import List
+
 class Identifier:
     def __init__(self, cod, nome, linha, coluna, tipo=None):
         self.cod:       int = cod
@@ -5,6 +7,7 @@ class Identifier:
         self.linha:     int = linha
         self.coluna:    int = coluna
         self.tipo:      str = tipo
+        self.params:    List[str] = []
         
     def __str__(self):
-        return f"Identifier(cod={self.cod}, nome='{self.nome}', linha={self.linha}, coluna={self.coluna}, tipo={self.tipo})"
+        return f"Identifier(cod={self.cod}, nome='{self.nome}', linha={self.linha}, coluna={self.coluna}, tipo={self.tipo}, params={self.params})"
