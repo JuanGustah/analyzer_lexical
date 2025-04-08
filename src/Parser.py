@@ -607,6 +607,8 @@ class Parser:
                 if(identificador_tipo != typeAssignment):
                     self.throwSemanticError()
 
+                self.generator.emit(f"{identificador_nome} = {temp}")
+
                 if(self.match(";")):
                     self.getNextToken()
                     return identificador_tipo
@@ -711,6 +713,7 @@ class Parser:
         if typeUnaryOperator:
             new_temp = self.generator.gen_temp()
             self.generator.emit(f"{new_temp} = {unaryOperator} {temp}")
+            return typeTerm, new_temp
         
         return typeTerm, temp
 
