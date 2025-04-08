@@ -268,6 +268,9 @@ class Parser:
                     #adicionar tipo de retorno da tabela de simbolos do id da função (global)
                     self.setIdType(self.actualToken, Tipo.INT, self.global_context)
 
+                    self.generator.emit(f"func begin {funcName}")
+
+
                     self.next_context = "hora_do_show" 
 
                     self.getNextToken()
@@ -281,6 +284,8 @@ class Parser:
 
                             self.body(ContextMetadata(Nature.FUNC, funcName))
                             
+                            self.generator.emit(f"func end")
+
                             self.getNextToken()
 
                             return None
@@ -295,6 +300,9 @@ class Parser:
             if self.match('hora_do_show'):
                 self.getNextToken()
                 if self.identifier():
+                    procName = self.actualToken
+                    self.generator.emit(f"proc begin {procName.lexema}")
+
                     self.next_context = "hora_do_show"
                     self.getNextToken()
                     if self.match('('):  
@@ -307,6 +315,7 @@ class Parser:
 
                             self.body(ContextMetadata(Nature.PROC))
                             
+                            self.generator.emit(f"func end")
                             self.getNextToken()
 
                             return None
@@ -575,6 +584,8 @@ class Parser:
             if(typeReturnExpresison != funcSymbolTable.tipo):
                 self.throwSemanticError()
 
+
+            self.generator.emit(f"return {temp}")
             # if(self.expression()):
 
             if(self.match(";")):

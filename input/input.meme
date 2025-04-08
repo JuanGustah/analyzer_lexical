@@ -1,5 +1,6 @@
-void hora_do_show amostrar(int x, int y){
+int hora_do_show amostrar(int x, int y){
   amostradinho(5);
+  receba 5;
 }
 
 meme {
