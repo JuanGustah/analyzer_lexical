@@ -3,6 +3,7 @@ int hora_do_show amostrar(int x, bruh y){
 }
 
 meme {
-  int x = 5;
-  amostrar(5,real);
-} 
+    int x; int j = 1;
+    x = j;
+    amostradinho(x);
+}
