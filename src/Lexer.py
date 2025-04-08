@@ -246,6 +246,8 @@ class Lexer:
         # verificar se o token é identificador sim = salvar na tabela de simbolos
         insertedRegCode = None
         if token_type == 'id':
+            previousToken = self.look_previous_token()
+
             register = Identifier(
                 self.line_number+self.head_position, 
                 lexema, 
@@ -254,7 +256,10 @@ class Lexer:
                 None
             )
             
-            inserted_reg = self.context.add_reg(register)
+            inserted_reg = self.context.add_reg(
+                register, 
+                self.checkIfTokenIdIsForDeclaration(previousToken)
+            )
 
             insertedRegCode = inserted_reg.cod
         
@@ -273,6 +278,16 @@ class Lexer:
 
     def forward_head(self):
         self.head_position += 1
+
+    def look_previous_token(self):
+        if(self.head_position > 0):
+            return self.tokens[-1]
+        
+    def checkIfTokenIdIsForDeclaration(self, previousToken:Token):
+        if(previousToken.lexema == "int" or previousToken.lexema == "bruh"):
+            return True
+        else:
+            return False
 
     def display_tokens(self):
         print('\t\t\t TOKENS')

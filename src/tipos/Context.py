@@ -29,11 +29,16 @@ class Context:
                 return sub
         return None
 
-    def add_reg(self, reg: Identifier) -> Optional[Identifier]:
-        if(reg != None):
+    def add_reg(self, reg: Identifier, isDeclaration: bool) -> Optional[Identifier]:
+        if isDeclaration:
+            register = self.symbol_table.lookup(reg.nome)
+        else:
+            register = self.lookupByName(reg.nome)
+
+        if(register == None):
             return self.symbol_table.add(reg)
         else:
-            return reg
+            return register
     
     def setType(self, token: Token, newType: Tipo) -> bool:
         register = self.symbol_table.lookup(token.lexema)
@@ -43,18 +48,29 @@ class Context:
         
         register.tipo = newType
 
-    def lookup(self, token: Token) -> Optional[Identifier]:
-        if not token:
-            return None
+    # def lookup(self, token: Token) -> Optional[Identifier]:
+    #     if not token:
+    #         return None
         
-        registro = self.symbol_table.lookup(token.lexema)
+    #     registro = self.symbol_table.lookup(token.lexema)
         
-        # não é o mesmo token, ou seja, foi criado antes
-        if registro and registro.cod != token.indice_tabela:
+    #     # não é o mesmo token, ou seja, foi criado antes
+    #     if registro and registro.cod != token.indice_tabela:
+    #         return registro
+
+    #     if self.parent:
+    #         return self.parent.lookup(token)  
+        
+    #     return None
+    
+    def lookupByName(self, lexema) -> Optional[Identifier]:
+        registro = self.symbol_table.lookup(lexema)
+        
+        if registro:
             return registro
 
         if self.parent:
-            return self.parent.lookup(token)  
+            return self.parent.lookupByName(lexema)  
         
         return None
 

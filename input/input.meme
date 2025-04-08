@@ -1,6 +1,8 @@
+void hora_do_show amostrar(int x, int y){
+  amostradinho(5);
+}
+
 meme {
     int x = 5;
-    irineu_voce_sabe(real) {
-        amostradinho(+2+2/2);
-    }
-}
+    amostrar(5);
+} 
