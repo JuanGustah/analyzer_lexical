@@ -170,7 +170,7 @@ class Parser:
             self.declarationVariableStep()
     
     
-    def callParameters(self, funcParams):
+    def callParameters(self, funcParams, paramsTemps):
         logging.info(f'callParameters')
 
         if(len(funcParams) == 0):
@@ -182,12 +182,18 @@ class Parser:
 
         if(typeExpression != paramType):
             self.throwSemanticError()
-
+        
         if(self.match(',')):
             self.getNextToken()
-            self.callParameters(funcParams)
+
+            paramsTemps.append(temp)
+            self.callParameters(funcParams, paramsTemps)
+            return paramsTemps
         elif len(funcParams) > 0:
             self.throwSemanticError()
+        else:
+            paramsTemps.append(temp)
+            return paramsTemps
         
     
     # ==================================== DECLARAÇÕES =============================================== #
@@ -676,10 +682,10 @@ class Parser:
         if(self.match("(")):
             self.getNextToken()
 
-
             paramsCopy = funcRegister.params[:]
+            paramsTemps = []
             if(not self.match(")")):
-                self.callParameters(paramsCopy)
+                paramsTemps = self.callParameters(paramsCopy,[])
             else:
                 if(len(paramsCopy) != 0):
                     self.throwSemanticError()
@@ -695,6 +701,13 @@ class Parser:
             #passa quando não tem parametros e quanto tem parametros, não remover!
             if(self.match(")")):
                 self.getNextToken()
+
+                #print de chamada de função
+                for temp in paramsTemps:
+                    self.generator.emit(f'param {temp}')
+
+                self.generator.emit(f'{funcRegister.nome},{len(paramsTemps)}')
+                self.generator.emit(f'return')
                 return True
         return False
 
