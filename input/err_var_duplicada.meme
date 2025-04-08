@@ -1,0 +1,7 @@
+meme {
+  int x;
+  int x = 10;
+  
+  #necessario#
+  amostradinho(1);
+}

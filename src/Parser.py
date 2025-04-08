@@ -77,7 +77,7 @@ class Parser:
                 
             #     return False  
 
-        self.mainBody()
+        ex = self.mainBody()
 
         return True
 
@@ -151,6 +151,9 @@ class Parser:
                         #         self.throwSemanticError("Procedimento não deve terminar com 'receba'")
                         self.exit_context()
                     return None
+                
+                if self.match(';'):
+                    return None    
             
             self.throwSyntaxError()
             # if(self.statements()):
@@ -681,6 +684,7 @@ class Parser:
             
             if(self.match("=")):
                 self.checkIfIsDeclared(identificador_token)
+                # ele volta depois do soma então o token é (
                 typeAssignment, temp = self.assignStatement()
 
                 #validar se id tem tipo igual ao da expressão
@@ -692,8 +696,11 @@ class Parser:
                 if(self.match(";")):
                     self.getNextToken()
                     return identificador_tipo
-                
-                self.throwSyntaxError()
+                elif self.match("("):
+                    funcRegister = self.global_context.symbol_table.lookup(temp)
+                    return self.callFunctionStatement(funcRegister)
+                else:
+                    self.throwSyntaxError()
             
             elif(self.match('(')):
                 funcRegister = self.global_context.symbol_table.lookup(identificador_nome)
@@ -974,7 +981,7 @@ class Parser:
         #se o local que eu estou lendo (token) é igual o local que ele foi declarado (registro)
         #pois aqui estou apenas usando a variavel, portanto não devem ser o mesmo lugar a leitura e decl
         if tokenLinha == registroLinha and tokenColuna == registroColuna:
-            self.throwSemanticError(f"Variavel declarada")
+            self.throwSemanticError(f"Variavel {registro.nome} Não Declarada")
 
     def setIdType(self, idToken, newType, context = None):
         if(context):

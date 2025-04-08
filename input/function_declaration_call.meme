@@ -5,6 +5,7 @@ int hora_do_show soma(int a, int b) {
 
 meme {
     int a = 10; int b = 15;
-    int result = soma(a, b);
+    int result;
+    result = soma(22, 15);
     amostradinho(result);
 }
