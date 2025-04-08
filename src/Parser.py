@@ -941,7 +941,7 @@ class Parser:
         registro = self.current_context.lookupByName(idName)
         
         if registro:
-            return registro
+            return registro.tipo
         else:
             return None
 
