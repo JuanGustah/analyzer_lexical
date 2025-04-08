@@ -1,9 +1,8 @@
-int hora_do_show amostrar(int x, int y){
+int hora_do_show amostrar(int x, bruh y){
   amostradinho(5);
-  receba 5;
 }
 
 meme {
-    int x = 5;
-    amostrar(5);
+  int x = 5;
+  amostrar(5,real);
 } 

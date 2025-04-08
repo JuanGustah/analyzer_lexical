@@ -38,9 +38,14 @@ class SymbolTable:
                 return True
             
         return False
+    
+    def addParam(self, func, param, paramType):
+        for i in self.table:
+            if func == i.nome:
+                i.params.append((paramType, param))
 
     def list(self):
-        headers = ["Indice", "Lexema", "Linha", "Coluna", "Tipo"]
-        data = [[symbol.cod, symbol.nome, symbol.linha, symbol.coluna, symbol.tipo] for symbol in self.table]
+        headers = ["Indice", "Lexema", "Linha", "Coluna", "Tipo", "Params"]
+        data = [[symbol.cod, symbol.nome, symbol.linha, symbol.coluna, symbol.tipo, symbol.params] for symbol in self.table]
         print("\nTabela de Símbolos:")
         print(tabulate(data, headers=headers, tablefmt="grid"))

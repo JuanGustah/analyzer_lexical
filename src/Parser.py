@@ -170,15 +170,24 @@ class Parser:
             self.declarationVariableStep()
     
     
-    def callParameters(self):
+    def callParameters(self, funcParams):
         logging.info(f'callParameters')
-        typeFirstExpression, temp = self.expression()
 
-        self.getNextToken()
-        
+        if(len(funcParams) == 0):
+            self.throwSemanticError()
+
+        typeExpression, temp = self.expression()
+
+        paramType, name = funcParams.pop(0)
+
+        if(typeExpression != paramType):
+            self.throwSemanticError()
+
         if(self.match(',')):
             self.getNextToken()
-            self.declarationVariableStep()
+            self.callParameters(funcParams)
+        elif len(funcParams) > 0:
+            self.throwSemanticError()
         
     
     # ==================================== DECLARAÇÕES =============================================== #
@@ -233,13 +242,16 @@ class Parser:
         # return False
     
     
-    def declarationParameters(self):
+    def declarationParameters(self, funcName):
         logging.info(f'declarationParameters')
         tipo_variavel = self.checkType()
         if(tipo_variavel):
             self.getNextToken()
             
             if(self.identifier(tipo_variavel)):
+                paramName = self.actualToken.lexema
+                
+                self.addParamInSymbolTable(funcName,paramName,tipo_variavel)
                 self.getNextToken()
             else:
                 self.throwSyntaxError()
@@ -248,7 +260,7 @@ class Parser:
                 self.getNextToken()
 
                 if(self.checkType()):
-                    return self.declarationParameters()
+                    return self.declarationParameters(funcName)
                 self.throwSyntaxError()
             else:
                 return None
@@ -270,14 +282,13 @@ class Parser:
 
                     self.generator.emit(f"func begin {funcName}")
 
-
                     self.next_context = "hora_do_show" 
 
                     self.getNextToken()
                     if self.match('('):  
                         self.getNextToken()
 
-                        self.declarationParameters()
+                        self.declarationParameters(funcName)
 
                         if self.match(')'): 
                             self.getNextToken()
@@ -300,15 +311,15 @@ class Parser:
             if self.match('hora_do_show'):
                 self.getNextToken()
                 if self.identifier():
-                    procName = self.actualToken
-                    self.generator.emit(f"proc begin {procName.lexema}")
+                    funcName = self.actualToken.lexema
+                    self.generator.emit(f"proc begin {funcName}")
 
                     self.next_context = "hora_do_show"
                     self.getNextToken()
                     if self.match('('):  
                         self.getNextToken()
 
-                        self.declarationParameters()
+                        self.declarationParameters(funcName)
 
                         if self.match(')'):  
                             self.getNextToken()
@@ -627,18 +638,18 @@ class Parser:
                 self.throwSyntaxError()
             
             elif(self.match('(')):
-                result = self.global_context.symbol_table.lookup(identificador_nome)
+                funcRegister = self.global_context.symbol_table.lookup(identificador_nome)
 
-                if result:
-                    self.callFunctionStatement()
+                if funcRegister:
+                    self.callFunctionStatement(funcRegister)
                 else:
                     self.throwSemanticError()
                     
                 if(self.match(";")):
                     self.getNextToken()
 
-                if result.tipo:
-                    return result.tipo
+                if funcRegister.tipo:
+                    return funcRegister.tipo
                 else:
                     return None
         self.throwSyntaxError()
@@ -660,12 +671,18 @@ class Parser:
         self.throwSyntaxError()
     
     
-    def callFunctionStatement(self):
+    def callFunctionStatement(self, funcRegister):
         logging.info(f'callFunctionStatement')
         if(self.match("(")):
             self.getNextToken()
 
-            self.callParameters()
+
+            paramsCopy = funcRegister.params[:]
+            if(not self.match(")")):
+                self.callParameters(paramsCopy)
+            else:
+                if(len(paramsCopy) != 0):
+                    self.throwSemanticError()
             
             # if(self.identifier()):
             #     self.getNextToken()
@@ -675,7 +692,9 @@ class Parser:
             #         self.identifier()
             #         self.getNextToken()
 
+            #passa quando não tem parametros e quanto tem parametros, não remover!
             if(self.match(")")):
+                self.getNextToken()
                 return True
         return False
 
@@ -897,6 +916,9 @@ class Parser:
             context.setType(idToken, newType)
             
         self.current_context.setType(idToken, newType)
+    
+    def addParamInSymbolTable(self, funcName, paramName, paramType):
+        self.global_context.symbol_table.addParam(funcName, paramName, paramType)
 
     def throwSyntaxError(self):
         logging.error(f"SyntaxError → {self.actualToken}")
