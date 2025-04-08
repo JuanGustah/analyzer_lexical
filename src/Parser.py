@@ -145,7 +145,7 @@ class Parser:
                     if metadata:
                         if metadata.nature == Nature.FUNC:
                             if last_statement_type != 'receba':
-                                self.throwSemanticError(f"Função deve terminar com 'receba' terminou com '{last_statement_type[0]}'")
+                                self.throwSemanticError(f"Função deve terminar com 'receba'")
                         # elif metadata.nature == Nature.PROC:
                         #     if last_statement_type == 'receba':
                         #         self.throwSemanticError("Procedimento não deve terminar com 'receba'")
@@ -554,9 +554,9 @@ class Parser:
                 self.getNextToken()
                 
                 expressionType, temp = self.expression()
-                # To testando here_we_go_again (x > 0) isso eé bruh 
-                # if(expressionType != Tipo.BRUH):
-                #     self.throwSemanticError()
+
+                if(expressionType != Tipo.BRUH):
+                    self.throwSemanticError()
 
                 if(self.match(")")):
                     
@@ -941,7 +941,7 @@ class Parser:
         registro = self.current_context.lookupByName(idName)
         
         if registro:
-            return registro.tipo
+            return registro
         else:
             return None
 
