@@ -3,7 +3,7 @@ from Parser import Parser
 
 if __name__ == "__main__":
     try:
-        lexer = Lexer("input/function_declaration_call.meme")
+        lexer = Lexer("input/input.meme")
         lexer.start()
         #lexer.display_tokens()
         #lexer.context.list_symbols()
