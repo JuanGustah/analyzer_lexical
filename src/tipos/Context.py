@@ -90,3 +90,8 @@ class Context:
         print(f"{indent} -> {context.identifier}")
         for subcontext in context.subcontexts:
             self.context_hierarchy(subcontext, depth + 1)
+            
+    def __str__(self):
+        if not self.parent:
+            return f"Identifier(nome={self.alias}, identificador='{self.identifier}', pai={self.parent.identifier})"
+        return f"Identifier(nome={self.alias}, identificador='{self.identifier}', pai={self.parent.identifier})"

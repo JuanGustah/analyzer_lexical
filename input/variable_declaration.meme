@@ -1,5 +1,7 @@
 meme {
-    int x = 10;
     bruh flag = real;
     int x = 10; int j = 20; int i;
+
+    #necessario#
+    amostradinho(1);
 }

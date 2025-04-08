@@ -1,5 +1,5 @@
 meme {
-    int x;
+    int x = 15;
     casca_de_bala(x);
     amostradinho(x);
 }

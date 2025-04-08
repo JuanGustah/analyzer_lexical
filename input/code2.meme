@@ -1,5 +1,6 @@
 meme {
     int teste3;
+    int x = 10;
     int teste; int dsadsa;
 
     amostradinho(real);

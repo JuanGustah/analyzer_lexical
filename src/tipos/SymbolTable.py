@@ -14,6 +14,13 @@ class SymbolTable:
         
         return None
     
+    def removeByCod(self, cod: int):
+        for idx, item in enumerate(self.table):
+            if item.cod == cod:
+                del self.table[idx]
+                break
+                 
+        
     def findByCod(self, cod: int) -> Optional[Identifier]:
         for i in self.table:
             if cod == i.cod:
@@ -43,6 +50,8 @@ class SymbolTable:
         for i in self.table:
             if func == i.nome:
                 i.params.append((paramType, param))
+                return i
+        
 
     def list(self):
         headers = ["Indice", "Lexema", "Linha", "Coluna", "Tipo", "Params"]

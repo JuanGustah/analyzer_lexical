@@ -72,7 +72,7 @@ class Lexer:
             new_context = self.next_context_to_create 
             
             if not new_context: 
-                print('sem contexto novo')
+                return
                 
             new_context = self.context.generate_unique_name(new_context)
             
